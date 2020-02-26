@@ -105,3 +105,23 @@ Instead of using `Features`, you would wrap your tree, providing a custom test f
 - `useEnabled(features: string | string[])`: return true iff any specified features are enabled.
 - `useDisabled(features: string | string[])`: return true iff any specified features are disabled.
 
+
+### `console` Interface
+
+In addition to ToggleFeatures, it is possible to toggle features on the console, if configured. To enable,
+pass a boolean to `consoleOverride` prop (you might want to feed this from an environment variable for dev vs
+prod builds, for example):
+
+```js
+    <Features features={FEATURES} enabled={ENABLED} consoleOverride={true}>
+      <RestOfApp />
+    </Features>
+```
+
+Then, in the browser console, you can toggle features:
+
+```js
+> window.features.enable("foo")
+> window.features.disable("foo")
+```
+
