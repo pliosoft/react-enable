@@ -2,9 +2,10 @@
   "name": "react-enable",
   "version": "1.0.0",
   "description": "feature flags to enable and disable functionality at runtime in a react application",
-  "main": "index.js",
+  "main": "dist/bundle.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsc --watch",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -23,17 +24,12 @@
   },
   "homepage": "https://github.com/pliosoft/react-enable#readme",
   "peerDependencies": {
-    "react": "16.12^"
+    "react": "16.12^",
+    "tslib": "1.11.0^"
   },
   "devDependencies": {
     "react": "16.12^",
     "typescript": "^3.8.2",
     "@types/react": "^16.9.22"
-  },
-  "main": "dist/bundle.js",
-  "module": "lib/index.js",
-  "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc"
   }
 }

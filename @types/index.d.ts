@@ -13,7 +13,7 @@ export declare function useAllDisabled(withoutAll: string[]): boolean;
 export declare function useEnabled(feature: string | string[]): boolean;
 export declare function useDisabled(without: string | string[]): boolean;
 export declare const Enable: FC<EnableProps>;
-interface Feature {
+export interface Feature {
     readonly name: string;
     readonly description?: string;
 }
@@ -36,7 +36,7 @@ interface SetActiveFeatures {
 declare type EnableAction = EnableFeature | DisableFeature | ToggleFeature | SetActiveFeatures;
 interface FeatureProps {
     readonly features: Feature[];
-    readonly active: string[];
+    readonly enabled: string[];
 }
 declare class GlobalEnable {
     readonly dispatch: Dispatch<EnableAction>;

@@ -95,7 +95,7 @@ export const Enable: FC<EnableProps> = ({
   return null
 }
 
-interface Feature {
+export interface Feature {
   readonly name: string
   readonly description?: string
 }
@@ -177,7 +177,7 @@ const reducer: Reducer<EnableState, EnableAction> = (state, action) => {
 
 interface FeatureProps {
   readonly features: Feature[]
-  readonly active: string[]
+  readonly enabled: string[]
 }
 
 class GlobalEnable {
@@ -217,13 +217,13 @@ const FeatureContext = createContext<FeatureContextType | null>(null)
  * A more batteries-enabled parent component that keeps track of feature state
  * internally, and creates window.feature.enable("f") and window.feature.disable("f").
  */
-export const Features: FC<FeatureProps> = ({features, active, children}) => {
-  const initial: EnableState = {features, active: new Set(active)}
+export const Features: FC<FeatureProps> = ({features, enabled, children}) => {
+  const initial: EnableState = {features, active: new Set(enabled)}
   const [state, dispatch] = useReducer(reducer, initial)
 
   useEffect(() => {
-    dispatch({type: 'set-active', active})
-  }, [active])
+    dispatch({type: 'set-active', active: enabled})
+  }, [enabled])
 
   useEffect(() => {
     window.feature = new GlobalEnable(dispatch)

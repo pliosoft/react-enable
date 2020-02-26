@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es6",
     "rootDirs": ["src", "stories"],
     "importHelpers": true,
     "removeComments": true,
@@ -14,9 +14,7 @@
     "declaration": true,
     "declarationDir": "./@types",
     "baseUrl": ".",
-
     "module": "commonjs",
-
     "outDir": "./dist/"
   },
   "main": "./dist/index.js",

@@ -47,17 +47,11 @@ const reducer = (state, action) => {
     switch (action.type) {
         case 'enable': {
             state.active.add(action.feature);
-            return {
-                ...state,
-                active: state.active
-            };
+            return Object.assign(Object.assign({}, state), { active: state.active });
         }
         case 'disable': {
             state.active.delete(action.feature);
-            return {
-                ...state,
-                active: state.active
-            };
+            return Object.assign(Object.assign({}, state), { active: state.active });
         }
         case 'toggle': {
             if (state.active.has(action.feature)) {
@@ -66,16 +60,10 @@ const reducer = (state, action) => {
             else {
                 state.active.add(action.feature);
             }
-            return {
-                ...state,
-                active: state.active
-            };
+            return Object.assign(Object.assign({}, state), { active: state.active });
         }
         case 'set-active': {
-            return {
-                ...state,
-                active: new Set(action.active)
-            };
+            return Object.assign(Object.assign({}, state), { active: new Set(action.active) });
         }
         default:
             throw new Error("Unsupported action");
@@ -96,12 +84,12 @@ class GlobalEnable {
     }
 }
 const FeatureContext = react_1.createContext(null);
-exports.Features = ({ features, active, children }) => {
-    const initial = { features, active: new Set(active) };
+exports.Features = ({ features, enabled, children }) => {
+    const initial = { features, active: new Set(enabled) };
     const [state, dispatch] = react_1.useReducer(reducer, initial);
     react_1.useEffect(() => {
-        dispatch({ type: 'set-active', active });
-    }, [active]);
+        dispatch({ type: 'set-active', active: enabled });
+    }, [enabled]);
     react_1.useEffect(() => {
         window.feature = new GlobalEnable(dispatch);
         return () => {
