@@ -1,21 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
-const react_1 = tslib_1.__importStar(require("react"));
-exports.EnableContext = react_1.createContext((_s) => false);
+var tslib_1 = require("tslib");
+var React = tslib_1.__importStar(require("react"));
+var Set_1 = require("fp-ts/lib/Set");
+var Eq_1 = require("fp-ts/lib/Eq");
+exports.EnableContext = React.createContext(function (_s) { return false; });
 function useEnabledFull(props) {
-    const { feature = [], without = [], allFeatures = [], withoutAll = [] } = props;
-    const test = react_1.useContext(exports.EnableContext);
+    var _a = props.feature, feature = _a === void 0 ? [] : _a, _b = props.without, without = _b === void 0 ? [] : _b, _c = props.allFeatures, allFeatures = _c === void 0 ? [] : _c, _d = props.withoutAll, withoutAll = _d === void 0 ? [] : _d;
+    var test = React.useContext(exports.EnableContext);
     if (test == null) {
         return false;
     }
-    let someFeatureList = Array.isArray(feature) ? feature : [feature];
-    let maybeEnabled = someFeatureList.some(test) || allFeatures.every(test);
-    if (!maybeEnabled) {
+    var someFeatureList = Array.isArray(feature) ? feature : [feature];
+    var maybeEnabled = someFeatureList.some(test) || allFeatures.length > 0 && allFeatures.every(test);
+    if (!maybeEnabled && feature.length > 0) {
         return false;
     }
-    let someWithoutList = Array.isArray(without) ? without : [without];
-    let maybeDisabled = someWithoutList.some(test) || withoutAll.every(test);
+    var someWithoutList = Array.isArray(without) ? without : [without];
+    var maybeDisabled = someWithoutList.some(test) || withoutAll.length > 0 && withoutAll.every(test);
     if (maybeDisabled) {
         return false;
     }
@@ -23,102 +25,98 @@ function useEnabledFull(props) {
 }
 exports.useEnabledFull = useEnabledFull;
 function useAllEnabled(allFeatures) {
-    return useEnabledFull({ allFeatures });
+    return useEnabledFull({ allFeatures: allFeatures });
 }
 exports.useAllEnabled = useAllEnabled;
 function useAllDisabled(withoutAll) {
-    return useEnabledFull({ withoutAll });
+    return useEnabledFull({ withoutAll: withoutAll });
 }
 exports.useAllDisabled = useAllDisabled;
 function useEnabled(feature) {
-    return useEnabledFull({ feature });
+    return useEnabledFull({ feature: feature });
 }
 exports.useEnabled = useEnabled;
 function useDisabled(without) {
-    return useEnabledFull({ without });
+    return useEnabledFull({ without: without });
 }
 exports.useDisabled = useDisabled;
-exports.Enable = ({ feature = [], without = [], allFeatures = [], withoutAll = [], children }) => {
-    if (useEnabledFull({ feature, without, allFeatures, withoutAll })) {
-        return react_1.createElement(react_1.default.Fragment, null, children);
+exports.Enable = function (_a) {
+    var _b = _a.feature, feature = _b === void 0 ? [] : _b, _c = _a.without, without = _c === void 0 ? [] : _c, _d = _a.allFeatures, allFeatures = _d === void 0 ? [] : _d, _e = _a.withoutAll, withoutAll = _e === void 0 ? [] : _e, children = _a.children;
+    if (useEnabledFull({ feature: feature, without: without, allFeatures: allFeatures, withoutAll: withoutAll })) {
+        return React.createElement(React.Fragment, null, children);
     }
     return null;
 };
-const reducer = (state, action) => {
+var insertStr = Set_1.insert(Eq_1.eqString);
+var removeStr = Set_1.remove(Eq_1.eqString);
+var elemStr = Set_1.elem(Eq_1.eqString);
+var reducer = function (state, action) {
     switch (action.type) {
         case 'enable': {
-            state.active.add(action.feature);
-            return Object.assign(Object.assign({}, state), { active: state.active });
+            return tslib_1.__assign(tslib_1.__assign({}, state), { active: insertStr(action.feature)(state.active) });
         }
         case 'disable': {
-            state.active.delete(action.feature);
-            return Object.assign(Object.assign({}, state), { active: state.active });
+            return tslib_1.__assign(tslib_1.__assign({}, state), { active: removeStr(action.feature)(state.active) });
         }
         case 'toggle': {
-            if (state.active.has(action.feature)) {
-                state.active.delete(action.feature);
-            }
-            else {
-                state.active.add(action.feature);
-            }
-            return Object.assign(Object.assign({}, state), { active: state.active });
+            return tslib_1.__assign(tslib_1.__assign({}, state), { active: (elemStr(action.feature, state.active)) ?
+                    removeStr(action.feature)(state.active) :
+                    insertStr(action.feature)(state.active) });
         }
         case 'set-active': {
-            return Object.assign(Object.assign({}, state), { active: new Set(action.active) });
+            return tslib_1.__assign(tslib_1.__assign({}, state), { active: Set_1.fromArray(Eq_1.eqString)(action.active) });
         }
         default:
             throw new Error("Unsupported action");
     }
 };
-class GlobalEnable {
-    constructor(dispatch) {
+var GlobalEnable = (function () {
+    function GlobalEnable(dispatch) {
         this.dispatch = dispatch;
     }
-    toggle(feature) {
-        this.dispatch({ type: 'toggle', feature });
-    }
-    enable(feature) {
-        this.dispatch({ type: 'enable', feature });
-    }
-    disable(feature) {
-        this.dispatch({ type: 'disable', feature });
-    }
-}
-const FeatureContext = react_1.createContext(null);
-exports.Features = ({ features, enabled, children }) => {
-    const initial = { features, active: new Set(enabled) };
-    const [state, dispatch] = react_1.useReducer(reducer, initial);
-    react_1.useEffect(() => {
-        dispatch({ type: 'set-active', active: enabled });
-    }, [enabled]);
-    react_1.useEffect(() => {
+    GlobalEnable.prototype.toggle = function (feature) {
+        this.dispatch({ type: 'toggle', feature: feature });
+    };
+    GlobalEnable.prototype.enable = function (feature) {
+        this.dispatch({ type: 'enable', feature: feature });
+    };
+    GlobalEnable.prototype.disable = function (feature) {
+        this.dispatch({ type: 'disable', feature: feature });
+    };
+    return GlobalEnable;
+}());
+var FeatureContext = React.createContext(null);
+exports.Features = function (_a) {
+    var features = _a.features, defaultEnabled = _a.defaultEnabled, _b = _a.consoleOverride, consoleOverride = _b === void 0 ? false : _b, children = _a.children;
+    var initial = { features: features, active: new Set(defaultEnabled) };
+    var _c = React.useReducer(reducer, initial), state = _c[0], dispatch = _c[1];
+    React.useEffect(function () {
+        if (!consoleOverride) {
+            return function () { };
+        }
         window.feature = new GlobalEnable(dispatch);
-        return () => {
+        return function () {
             window.feature = undefined;
         };
     }, [dispatch]);
-    const featureValue = react_1.useMemo(() => ({ dispatch, state }), [dispatch, state]);
-    const testCallback = react_1.useCallback((f) => state.active.has(f), [state, state.active]);
-    return (react_1.createElement(FeatureContext.Provider, { value: featureValue }, react_1.createElement(exports.EnableContext.Provider, { value: testCallback }, children)));
+    var featureValue = React.useMemo(function () { return ({ dispatch: dispatch, state: state }); }, [dispatch, state, state.active]);
+    var testCallback = React.useCallback(function (f) {
+        return state.active.has(f);
+    }, [state, state.active]);
+    return (React.createElement(FeatureContext.Provider, { value: featureValue },
+        React.createElement(exports.EnableContext.Provider, { value: testCallback }, children)));
 };
-exports.ToggleFeatures = () => {
-    const context = react_1.useContext(FeatureContext);
+exports.ToggleFeatures = function () {
+    var context = React.useContext(FeatureContext);
     if (context == null) {
         return null;
     }
-    const { dispatch, state } = context;
-    const handleChange = react_1.useCallback(feature => {
-        dispatch({ type: 'toggle', feature });
-    }, [dispatch]);
-    return react_1.createElement("aside", { className: "toggle-features" }, state.features.map(feature => react_1.createElement("div", {}, [
-        react_1.createElement("h4", {}, [
-            react_1.createElement("main", {}, feature.name),
-        ]),
-        react_1.createElement("h5", {}, feature.description),
-        react_1.createElement("input", {
-            "type": "checkbox",
-            onChange: () => handleChange(feature.name),
-            value: state.active.has(feature.name)
-        }, [])
-    ])));
+    var dispatch = context.dispatch, state = context.state;
+    return (React.createElement("aside", { className: "toggle-features" }, state.features.map(function (feature) { return (React.createElement("div", null,
+        React.createElement("label", null,
+            React.createElement("input", { type: "checkbox", onChange: function () {
+                    dispatch({ type: 'toggle', feature: feature.name });
+                }, checked: state.active.has(feature.name) }),
+            feature.name),
+        React.createElement("p", null, feature.description))); })));
 };

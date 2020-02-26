@@ -1,4 +1,4 @@
-import React, { FC, Dispatch } from 'react';
+import * as React from 'react';
 interface EnableProps {
     readonly feature?: string | string[];
     readonly without?: string | string[];
@@ -12,7 +12,7 @@ export declare function useAllEnabled(allFeatures: string[]): boolean;
 export declare function useAllDisabled(withoutAll: string[]): boolean;
 export declare function useEnabled(feature: string | string[]): boolean;
 export declare function useDisabled(without: string | string[]): boolean;
-export declare const Enable: FC<EnableProps>;
+export declare const Enable: React.FC<EnableProps>;
 export interface Feature {
     readonly name: string;
     readonly description?: string;
@@ -36,11 +36,12 @@ interface SetActiveFeatures {
 declare type EnableAction = EnableFeature | DisableFeature | ToggleFeature | SetActiveFeatures;
 interface FeatureProps {
     readonly features: Feature[];
-    readonly enabled: string[];
+    readonly defaultEnabled: string[];
+    readonly consoleOverride?: boolean;
 }
 declare class GlobalEnable {
-    readonly dispatch: Dispatch<EnableAction>;
-    constructor(dispatch: Dispatch<EnableAction>);
+    private readonly dispatch;
+    constructor(dispatch: React.Dispatch<EnableAction>);
     toggle(feature: string): void;
     enable(feature: string): void;
     disable(feature: string): void;
@@ -50,6 +51,6 @@ declare global {
         feature?: GlobalEnable;
     }
 }
-export declare const Features: FC<FeatureProps>;
-export declare const ToggleFeatures: FC;
+export declare const Features: React.FC<FeatureProps>;
+export declare const ToggleFeatures: React.FC;
 export {};

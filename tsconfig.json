@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
+    "module": "es2015",
+    "lib": ["es2015", "dom"],
     "rootDirs": ["src", "stories"],
     "importHelpers": true,
     "removeComments": true,
@@ -12,17 +14,18 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "declaration": true,
+    "jsx":"react",
     "declarationDir": "./@types",
     "esModuleInterop": true,
     "baseUrl": ".",
     "module": "commonjs",
     "outDir": "./dist/"
   },
-  "main": "./dist/index.js",
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": [
     "node_modules",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ]
 }
 

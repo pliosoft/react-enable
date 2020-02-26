@@ -13,7 +13,7 @@ Features include:
 To install,
 
 ```sh
-npm add --save react-enable
+npm add --save react-enable react fp-ts
 ```
 
 Then most users will use it in the following manner:
