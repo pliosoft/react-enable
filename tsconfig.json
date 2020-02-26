@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "rootDirs": ["src", "stories"],
+    "importHelpers": true,
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "declaration": true,
+    "declarationDir": "./@types",
+    "baseUrl": ".",
+
+    "module": "commonjs",
+
+    "outDir": "./dist/"
+  },
+  "main": "./dist/index.js",
+  "include": ["./src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
+}
+
