@@ -1,4 +1,4 @@
-import { FC, Dispatch } from 'react';
+import React, { FC, Dispatch } from 'react';
 interface EnableProps {
     readonly feature?: string | string[];
     readonly without?: string | string[];
@@ -6,7 +6,7 @@ interface EnableProps {
     readonly withoutAll?: string[];
 }
 declare type EnableContextType = (feature: String) => boolean;
-export declare const EnableContext: import("react").Context<EnableContextType>;
+export declare const EnableContext: React.Context<EnableContextType>;
 export declare function useEnabledFull(props: EnableProps): boolean;
 export declare function useAllEnabled(allFeatures: string[]): boolean;
 export declare function useAllDisabled(withoutAll: string[]): boolean;

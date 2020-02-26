@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const react_1 = require("react");
+const tslib_1 = require("tslib");
+const react_1 = tslib_1.__importStar(require("react"));
 exports.EnableContext = react_1.createContext((_s) => false);
 function useEnabledFull(props) {
     const { feature = [], without = [], allFeatures = [], withoutAll = [] } = props;
@@ -39,7 +40,7 @@ function useDisabled(without) {
 exports.useDisabled = useDisabled;
 exports.Enable = ({ feature = [], without = [], allFeatures = [], withoutAll = [], children }) => {
     if (useEnabledFull({ feature, without, allFeatures, withoutAll })) {
-        return react_1.createElement(react_1.Fragment, {}, children);
+        return react_1.createElement(react_1.default.Fragment, null, children);
     }
     return null;
 };

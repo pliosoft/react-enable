@@ -13,6 +13,7 @@
     "noUnusedParameters": true,
     "declaration": true,
     "declarationDir": "./@types",
+    "esModuleInterop": true,
     "baseUrl": ".",
     "module": "commonjs",
     "outDir": "./dist/"

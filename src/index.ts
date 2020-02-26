@@ -1,9 +1,8 @@
-import {
+import React, {
   FC,
-  createElement as h,
   Dispatch,
-  Fragment,
   createContext,
+  createElement as h,
   Reducer,
   useEffect,
   useMemo,
@@ -11,6 +10,7 @@ import {
   useReducer,
   useContext
 } from 'react'
+
 
 interface EnableProps {
   readonly feature?: string | string[]
@@ -89,7 +89,7 @@ export const Enable: FC<EnableProps> = ({
   feature = [], without = [], allFeatures = [], withoutAll = [], children
 }) => {
   if (useEnabledFull({feature, without, allFeatures, withoutAll})) {
-    return h(Fragment, {}, children)
+    return h(React.Fragment, null, children)
   }
 
   return null
