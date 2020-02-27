@@ -241,30 +241,116 @@ export const Features: React.FC<FeatureProps> = ({features, defaultEnabled, cons
 // might be put into a floating window that can be mounted in a portal, and then
 // dev users can toggle features.
 export const ToggleFeatures: React.FC = () => {
+  const [hide, setHide] = React.useState(false)
+  const [dragging, setDragging] = React.useState(false)
+  const dragElement = React.useRef<HTMLDivElement | null>(null)
+  const start = React.useRef([100, 100])
+  const offset = React.useRef([0, 0])
+  const [current, setCurrent] = React.useState([0, 0])
   const context = React.useContext(FeatureContext)
+
+  const handleMouseMove = React.useCallback((e) => {
+    e.preventDefault()
+    setCurrent([
+      (e.clientX - start.current[0]) - offset.current[0],
+      (e.clientY - start.current[1]) - offset.current[1]
+    ])
+  }, [setCurrent, start, offset])
+
+  const handleMouseUp = React.useCallback((e) => {
+    e.preventDefault()
+    setDragging(false)
+  }, [setDragging])
+
+
+  React.useEffect(() => {
+    if (!dragging) {
+      return () => {/* */}
+    }
+    document.addEventListener("mousemove", handleMouseMove)
+    return () => document.removeEventListener("mousemove", handleMouseMove)
+  }, [dragging, handleMouseMove])
+
+  const position = React.useMemo(() =>
+    [start.current[0] + current[0], start.current[1] + current[1]]
+    , [start.current[0], start.current[1], current[0], current[1]])
+
+  const handleMouseDown = React.useCallback((e) => {
+    e.preventDefault()
+    offset.current = [e.clientX - position[0], e.clientY - position[1]]
+    start.current = [position[0], position[1]]
+    setCurrent([
+      (e.clientX - start.current[0]) - offset.current[0],
+      (e.clientY - start.current[1]) - offset.current[1]
+    ])
+    setDragging(true)
+  }, [setDragging, start, offset, position[0], position[1]])
+
+  React.useEffect(() => {
+    dragElement.current?.addEventListener("mousedown", handleMouseDown)
+    document.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      dragElement.current?.removeEventListener("mouseup", handleMouseUp)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [dragElement, handleMouseDown, handleMouseUp])
+
+
   if (context == null) {
     return null
   }
-
   const {dispatch, state} = context
 
+  if (state.features.length === 0) {
+    return null
+  }
+
   return (
-    <aside className="toggle-features">
-      {
-        state.features.map(feature => (
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                onChange={() => {
-                  dispatch({type: 'toggle', feature: feature.name})
-                }}
-                checked={state.active.has(feature.name)} />
-              {feature.name}
-            </label>
-            <p>{feature.description}</p>
-          </div>))
-      }
+    <aside className="feature-flags" style={{
+      position: "fixed",
+      left: `${position[0]}px`,
+      top: `${position[1]}px`,
+      width: "200px",
+      height: "100px",
+      background: "white",
+      border: "1px solid gray",
+      zIndex: 100000,
+      opacity: "0.7",
+      display: hide ? "none" : "flex",
+      flexDirection: "column"
+    }}>
+      <div style={{
+        display: "flex",
+        borderBottom: "1px solid gray",
+        background: "#eee",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 0 0 10px"
+
+      }}>
+        <button onClick={() => setHide(true)}>Hide</button>
+        <span>Toggle Features</span>
+        <div ref={dragElement} style={{
+          fontSize: "28px",
+          cursor: "move",
+          width: "27px",
+          height: "32px",
+          lineHeight: "30px",
+        }}>⦷</div>
+      </div>
+      {state.features.map(feature => (
+        <div key={feature.name}>
+          <label>
+            <input
+              type="checkbox"
+              onChange={() => {
+                dispatch({type: 'toggle', feature: feature.name})
+              }}
+              checked={state.active.has(feature.name)} />
+            {feature.name}
+          </label>
+          {feature.description != null ? <p>{feature.description}</p> : null}
+        </div>))}
     </aside>
   )
 

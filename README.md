@@ -48,7 +48,7 @@ const RestOfApp : FC = () => {
 
 const App : FC = () => {
   return (
-    <Features features={FEATURES} enabled={ENABLED}>
+    <Features features={FEATURES} defaultEnabled={ENABLED}>
       <RestOfApp />
     </Features>
   )
@@ -63,8 +63,8 @@ Provides state and context for managing a set of features.
 
 props:
 
-- `features: Feature[]`: list of available features
-- `enabled`: list of enabled features
+- `features: Feature[]`: list of available features.
+- `defaultEnabled`: list of enabled features at startup. Does not update after mount.
 
 ### `Enabled` component
 
