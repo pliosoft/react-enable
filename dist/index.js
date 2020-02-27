@@ -198,5 +198,10 @@ exports.ToggleFeatures = function () {
                         dispatch({ type: 'toggle', feature: feature.name });
                     }, checked: state.active.has(feature.name) }),
                 feature.name),
-            feature.description != null ? React.createElement("p", null, feature.description) : null)); })));
+            feature.description != null ? React.createElement("p", { style: {
+                    marginTop: "0",
+                    marginLeft: "1.5em",
+                    fontSize: "0.5rem",
+                    lineHeight: "0.5rem"
+                } }, feature.description) : null)); })));
 };

@@ -349,7 +349,12 @@ export const ToggleFeatures: React.FC = () => {
               checked={state.active.has(feature.name)} />
             {feature.name}
           </label>
-          {feature.description != null ? <p>{feature.description}</p> : null}
+          {feature.description != null ? <p style={{
+            marginTop: "0",
+            marginLeft: "1.5em",
+            fontSize: "0.5rem",
+            lineHeight: "0.5rem"
+          }}>{feature.description}</p> : null}
         </div>))}
     </aside>
   )
