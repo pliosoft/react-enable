@@ -241,7 +241,50 @@ export const Features: React.FC<FeatureProps> = ({features, defaultEnabled, cons
 // might be put into a floating window that can be mounted in a portal, and then
 // dev users can toggle features.
 export const ToggleFeatures: React.FC = () => {
+  const [hide, setHide] = React.useState(false)
+  const [dragging, setDragging] = React.useState(false)
+  const dragElement = React.useRef<HTMLDivElement | null>(null)
+  const [start, setStart] = React.useState([100, 100])
+  const [current, setCurrent] = React.useState([0, 0])
   const context = React.useContext(FeatureContext)
+
+  const handleMouseDown = React.useCallback((e) => {
+    e.preventDefault()
+    setStart([e.clientX, e.clientY])
+    setDragging(true)
+  }, [setDragging])
+
+  const handleMouseMove = React.useCallback((e) => {
+    e.preventDefault()
+    setCurrent([e.clientX - start[0], e.clientY - start[1]])
+  }, [setCurrent, start[0], start[1]])
+
+  const handleMouseUp = React.useCallback((e) => {
+    e.preventDefault()
+    setDragging(false)
+  }, [setDragging])
+
+  React.useEffect(() => {
+    dragElement.current?.addEventListener("mousedown", handleMouseDown)
+    document.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      dragElement.current?.removeEventListener("mouseup", handleMouseUp)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [dragElement, handleMouseDown, handleMouseUp])
+
+  React.useEffect(() => {
+    if (!dragging) {
+      return () => {/* */}
+    }
+    document.addEventListener("mousemove", handleMouseMove)
+    return () => document.removeEventListener("mousemove", handleMouseMove)
+  }, [dragging, handleMouseMove])
+
+  const position = React.useMemo(() =>
+    [start[0] + current[0], start[1] + current[1]]
+    , [start[0], start[1], current[0], current[1]])
+
   if (context == null) {
     return null
   }
@@ -249,22 +292,48 @@ export const ToggleFeatures: React.FC = () => {
   const {dispatch, state} = context
 
   return (
-    <aside className="toggle-features">
-      {
-        state.features.map(feature => (
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                onChange={() => {
-                  dispatch({type: 'toggle', feature: feature.name})
-                }}
-                checked={state.active.has(feature.name)} />
-              {feature.name}
-            </label>
-            <p>{feature.description}</p>
-          </div>))
-      }
+    <aside className="feature-flags" style={{
+      position: "fixed",
+      left: `${position[0]}px`,
+      top: `${position[1]}px`,
+      width: "200px",
+      height: "100px",
+      background: "white",
+      border: "1px solid gray",
+      zIndex: 100000,
+      opacity: "0.7",
+      display: hide ? "none" : "flex",
+      flexDirection: "column"
+    }}>
+      <div style={{
+        display: "flex",
+        borderBottom: "1px solid gray",
+        background: "#eee",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 0 0 10px"
+      }}>
+        <button onClick={() => setHide(true)}>Hide</button>
+        <div ref={dragElement} style={{
+          fontSize: "20px",
+          cursor: "move",
+          width: "32px",
+          height: "32px"
+        }}>⦷</div>
+      </div>
+      {state.features.map(feature => (
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              onChange={() => {
+                dispatch({type: 'toggle', feature: feature.name})
+              }}
+              checked={state.active.has(feature.name)} />
+            {feature.name}
+          </label>
+          {feature.description != null ? <p>{feature.description}</p> : null}
+        </div>))}
     </aside>
   )
 

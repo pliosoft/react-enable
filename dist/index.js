@@ -107,16 +107,82 @@ exports.Features = function (_a) {
         React.createElement(exports.EnableContext.Provider, { value: testCallback }, children)));
 };
 exports.ToggleFeatures = function () {
+    var _a = React.useState(false), hide = _a[0], setHide = _a[1];
+    var _b = React.useState(false), dragging = _b[0], setDragging = _b[1];
+    var dragElement = React.useRef(null);
+    var _c = React.useState([100, 100]), start = _c[0], setStart = _c[1];
+    var _d = React.useState([0, 0]), current = _d[0], setCurrent = _d[1];
     var context = React.useContext(FeatureContext);
+    var handleMouseDown = React.useCallback(function (e) {
+        e.preventDefault();
+        setStart([e.clientX, e.clientY]);
+        setDragging(true);
+    }, [setDragging]);
+    var handleMouseMove = React.useCallback(function (e) {
+        e.preventDefault();
+        setCurrent([e.clientX - start[0], e.clientY - start[1]]);
+    }, [setCurrent, start[0], start[1]]);
+    var handleMouseUp = React.useCallback(function (e) {
+        e.preventDefault();
+        setDragging(false);
+    }, [setDragging]);
+    React.useEffect(function () {
+        var _a;
+        (_a = dragElement.current) === null || _a === void 0 ? void 0 : _a.addEventListener("mousedown", handleMouseDown);
+        document.addEventListener("mouseup", handleMouseUp);
+        return function () {
+            var _a;
+            (_a = dragElement.current) === null || _a === void 0 ? void 0 : _a.removeEventListener("mouseup", handleMouseUp);
+            document.removeEventListener("mouseup", handleMouseUp);
+        };
+    }, [dragElement, handleMouseDown, handleMouseUp]);
+    React.useEffect(function () {
+        if (!dragging) {
+            return function () { };
+        }
+        document.addEventListener("mousemove", handleMouseMove);
+        return function () { return document.removeEventListener("mousemove", handleMouseMove); };
+    }, [dragging, handleMouseMove]);
+    var position = React.useMemo(function () {
+        return [start[0] + current[0], start[1] + current[1]];
+    }, [start[0], start[1], current[0], current[1]]);
     if (context == null) {
         return null;
     }
     var dispatch = context.dispatch, state = context.state;
-    return (React.createElement("aside", { className: "toggle-features" }, state.features.map(function (feature) { return (React.createElement("div", null,
-        React.createElement("label", null,
-            React.createElement("input", { type: "checkbox", onChange: function () {
-                    dispatch({ type: 'toggle', feature: feature.name });
-                }, checked: state.active.has(feature.name) }),
-            feature.name),
-        React.createElement("p", null, feature.description))); })));
+    return (React.createElement("aside", { className: "feature-flags", style: {
+            position: "fixed",
+            left: position[0] + "px",
+            top: position[1] + "px",
+            width: "200px",
+            height: "100px",
+            background: "white",
+            border: "1px solid gray",
+            zIndex: 100000,
+            opacity: "0.7",
+            display: hide ? "none" : "flex",
+            flexDirection: "column"
+        } },
+        React.createElement("div", { style: {
+                display: "flex",
+                borderBottom: "1px solid gray",
+                background: "#eee",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 0 0 10px"
+            } },
+            React.createElement("button", { onClick: function () { return setHide(true); } }, "Hide"),
+            React.createElement("div", { ref: dragElement, style: {
+                    fontSize: "20px",
+                    cursor: "move",
+                    width: "32px",
+                    height: "32px"
+                } }, "\u29B7")),
+        state.features.map(function (feature) { return (React.createElement("div", null,
+            React.createElement("label", null,
+                React.createElement("input", { type: "checkbox", onChange: function () {
+                        dispatch({ type: 'toggle', feature: feature.name });
+                    }, checked: state.active.has(feature.name) }),
+                feature.name),
+            feature.description != null ? React.createElement("p", null, feature.description) : null)); })));
 };
