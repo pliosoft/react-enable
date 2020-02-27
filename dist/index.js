@@ -139,10 +139,6 @@ exports.ToggleFeatures = function () {
         e.preventDefault();
         offset.current = [e.clientX - position[0], e.clientY - position[1]];
         start.current = [position[0], position[1]];
-        setCurrent([
-            (e.clientX - start.current[0]) - offset.current[0],
-            (e.clientY - start.current[1]) - offset.current[1]
-        ]);
         setDragging(true);
     }, [setDragging, start, offset, position[0], position[1]]);
     React.useEffect(function () {

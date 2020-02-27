@@ -249,7 +249,7 @@ export const ToggleFeatures: React.FC = () => {
   const [current, setCurrent] = React.useState([0, 0])
   const context = React.useContext(FeatureContext)
 
-  const handleMouseMove = React.useCallback((e) => {
+  const handleMouseMove = React.useCallback(e => {
     e.preventDefault()
     setCurrent([
       (e.clientX - start.current[0]) - offset.current[0],
@@ -257,7 +257,7 @@ export const ToggleFeatures: React.FC = () => {
     ])
   }, [setCurrent, start, offset])
 
-  const handleMouseUp = React.useCallback((e) => {
+  const handleMouseUp = React.useCallback(e => {
     e.preventDefault()
     setDragging(false)
   }, [setDragging])
@@ -275,14 +275,10 @@ export const ToggleFeatures: React.FC = () => {
     [start.current[0] + current[0], start.current[1] + current[1]]
     , [start.current[0], start.current[1], current[0], current[1]])
 
-  const handleMouseDown = React.useCallback((e) => {
+  const handleMouseDown = React.useCallback(e => {
     e.preventDefault()
     offset.current = [e.clientX - position[0], e.clientY - position[1]]
     start.current = [position[0], position[1]]
-    setCurrent([
-      (e.clientX - start.current[0]) - offset.current[0],
-      (e.clientY - start.current[1]) - offset.current[1]
-    ])
     setDragging(true)
   }, [setDragging, start, offset, position[0], position[1]])
 
