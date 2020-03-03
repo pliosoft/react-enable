@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {insert, remove, elem, fromArray} from 'fp-ts/lib/Set'
+import {insert, remove, elem, intersection, fromArray} from 'fp-ts/lib/Set'
 import {eqString} from 'fp-ts/lib/Eq'
 
 interface EnableProps {
@@ -121,14 +121,18 @@ type EnableAction =
   | ToggleFeature
   | SetActiveFeatures
 
+const fromStrArray = fromArray(eqString)
 const insertStr = insert(eqString)
 const removeStr = remove(eqString)
 const elemStr = elem(eqString)
+const intersectStr = intersection(eqString)
 
 const reducer: React.Reducer<EnableState, EnableAction> = (state, action) => {
   switch (action.type) {
     case 'enable': {
-      //state.active.add(action.feature)
+      if (!state.features.some(x => x.name === action.feature)) {
+        return state
+      }
       return {
         ...state,
         active: insertStr(action.feature)(state.active)
@@ -136,6 +140,9 @@ const reducer: React.Reducer<EnableState, EnableAction> = (state, action) => {
     }
 
     case 'disable': {
+      if (!state.features.some(x => x.name === action.feature)) {
+        return state
+      }
       return {
         ...state,
         active: removeStr(action.feature)(state.active)
@@ -143,7 +150,9 @@ const reducer: React.Reducer<EnableState, EnableAction> = (state, action) => {
     }
 
     case 'toggle': {
-
+      if (!state.features.some(x => x.name === action.feature)) {
+        return state
+      }
       return {
         ...state,
         active: (elemStr(action.feature, state.active)) ?
@@ -153,9 +162,11 @@ const reducer: React.Reducer<EnableState, EnableAction> = (state, action) => {
     }
 
     case 'set-active': {
+      const proposedActive = fromStrArray(action.active)
+      const possible = fromStrArray(state.features.map(x => x.name))
       return {
         ...state,
-        active: fromArray(eqString)(action.active)
+        active: intersectStr(proposedActive, possible)
       }
     }
 

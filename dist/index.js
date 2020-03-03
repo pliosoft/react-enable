@@ -47,24 +47,37 @@ exports.Enable = function (_a) {
     }
     return null;
 };
+var fromStrArray = Set_1.fromArray(Eq_1.eqString);
 var insertStr = Set_1.insert(Eq_1.eqString);
 var removeStr = Set_1.remove(Eq_1.eqString);
 var elemStr = Set_1.elem(Eq_1.eqString);
+var intersectStr = Set_1.intersection(Eq_1.eqString);
 var reducer = function (state, action) {
     switch (action.type) {
         case 'enable': {
+            if (!state.features.some(function (x) { return x.name === action.feature; })) {
+                return state;
+            }
             return tslib_1.__assign(tslib_1.__assign({}, state), { active: insertStr(action.feature)(state.active) });
         }
         case 'disable': {
+            if (!state.features.some(function (x) { return x.name === action.feature; })) {
+                return state;
+            }
             return tslib_1.__assign(tslib_1.__assign({}, state), { active: removeStr(action.feature)(state.active) });
         }
         case 'toggle': {
+            if (!state.features.some(function (x) { return x.name === action.feature; })) {
+                return state;
+            }
             return tslib_1.__assign(tslib_1.__assign({}, state), { active: (elemStr(action.feature, state.active)) ?
                     removeStr(action.feature)(state.active) :
                     insertStr(action.feature)(state.active) });
         }
         case 'set-active': {
-            return tslib_1.__assign(tslib_1.__assign({}, state), { active: Set_1.fromArray(Eq_1.eqString)(action.active) });
+            var proposedActive = fromStrArray(action.active);
+            var possible = fromStrArray(state.features.map(function (x) { return x.name; }));
+            return tslib_1.__assign(tslib_1.__assign({}, state), { active: intersectStr(proposedActive, possible) });
         }
         default:
             throw new Error("Unsupported action");
