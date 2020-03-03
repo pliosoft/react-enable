@@ -29,7 +29,9 @@
     "fp-ts": "^2.5",
     "tslib": "^1.11"
   },
-  "dependencies": {},
+  "dependencies": {
+    "tslib": "^1.11.1"
+  },
   "devDependencies": {
     "@types/react": "^16.9.22",
     "fp-ts": "^2.5",
