@@ -1,6 +1,6 @@
 {
   "name": "react-enable",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "feature flags to enable and disable functionality at runtime in a react application",
   "main": "dist/index.js",
   "types": "@types/index.d.ts",

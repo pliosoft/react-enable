@@ -1,4 +1,5 @@
-import * as React from 'react';
+import * as React from "react";
+export { ToggleFeatures } from "./ToggleFeatures";
 interface EnableProps {
     readonly feature?: string | string[];
     readonly without?: string | string[];
@@ -17,20 +18,24 @@ export interface Feature {
     readonly name: string;
     readonly description?: string;
 }
+interface EnableState {
+    readonly features: Feature[];
+    readonly active: Set<string>;
+}
 interface DisableFeature {
-    type: 'disable';
+    type: "disable";
     readonly feature: string;
 }
 interface ToggleFeature {
-    type: 'toggle';
+    type: "toggle";
     readonly feature: string;
 }
 interface EnableFeature {
-    type: 'enable';
+    type: "enable";
     readonly feature: string;
 }
 interface SetActiveFeatures {
-    type: 'set-active';
+    type: "set-active";
     readonly active: string[];
 }
 declare type EnableAction = EnableFeature | DisableFeature | ToggleFeature | SetActiveFeatures;
@@ -51,6 +56,9 @@ declare global {
         feature?: GlobalEnable;
     }
 }
+interface FeatureContextType {
+    dispatch: React.Dispatch<EnableAction>;
+    state: EnableState;
+}
+export declare const FeatureContext: React.Context<FeatureContextType | null>;
 export declare const Features: React.FC<FeatureProps>;
-export declare const ToggleFeatures: React.FC;
-export {};
