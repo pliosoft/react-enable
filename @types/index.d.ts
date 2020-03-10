@@ -43,6 +43,7 @@ interface FeatureProps {
     readonly features: Feature[];
     readonly defaultEnabled: string[];
     readonly consoleOverride?: boolean;
+    readonly storage?: Storage;
 }
 declare class GlobalEnable {
     private readonly dispatch;

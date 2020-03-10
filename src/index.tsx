@@ -195,6 +195,7 @@ interface FeatureProps {
   readonly features: Feature[];
   readonly defaultEnabled: string[];
   readonly consoleOverride?: boolean;
+  readonly storage?: Storage;
 }
 
 class GlobalEnable {
@@ -240,22 +241,15 @@ export const Features: React.FC<FeatureProps> = ({
   features,
   defaultEnabled,
   consoleOverride = false,
+  storage,
   children
 }) => {
   const initial: EnableState = { features, active: new Set(defaultEnabled) };
   const [state, dispatch] = React.useReducer(reducer, initial);
 
-  React.useEffect(() => {
-    if (!consoleOverride) {
-      return () => {
-        /* empty */
-      };
-    }
-    window.feature = new GlobalEnable(dispatch);
-    return () => {
-      window.feature = undefined;
-    };
-  }, [dispatch]);
+  useLoadActive(storage, dispatch);
+  usePersistActive(state.active, storage);
+  useConsoleOverride(consoleOverride, dispatch);
 
   const featureValue = React.useMemo(() => ({ dispatch, state }), [
     dispatch,
@@ -276,3 +270,52 @@ export const Features: React.FC<FeatureProps> = ({
     </FeatureContext.Provider>
   );
 };
+
+function useConsoleOverride(
+  consoleOverride: boolean,
+  dispatch: React.Dispatch<EnableAction>
+) {
+  React.useEffect(() => {
+    if (!consoleOverride) {
+      return () => {
+        /* empty */
+      };
+    }
+    window.feature = new GlobalEnable(dispatch);
+    return () => {
+      window.feature = undefined;
+    };
+  }, [dispatch]);
+}
+
+function useLoadActive(
+  storage: Storage | undefined,
+  dispatch: React.Dispatch<EnableAction>
+) {
+  React.useEffect(() => {
+    if (storage != null) {
+      try {
+        const value = storage.getItem("react-enable:features");
+        if (value != null) {
+          dispatch({ type: "set-active", active: JSON.parse(value) });
+        }
+      } catch (e) {
+        // Can't parse or get
+      }
+    }
+  }, [storage]);
+}
+
+function usePersistActive(active: Set<string>, storage: Storage | undefined) {
+  const strState =
+    storage == null ? undefined : JSON.stringify(Array.from(active).sort());
+  React.useEffect(() => {
+    if (strState != null && storage != null) {
+      try {
+        storage.setItem("react-enable:features", strState);
+      } catch (e) {
+        // Can't set for some reason
+      }
+    }
+  }, [storage, strState]);
+}
