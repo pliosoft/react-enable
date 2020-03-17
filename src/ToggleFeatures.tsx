@@ -1,4 +1,4 @@
-import { FeatureContext } from "./index";
+import {FeatureContext} from "./index";
 import React from "react";
 
 // A GUI for toggling features that are configured by nearest `Features` parent.
@@ -12,7 +12,7 @@ export const ToggleFeatures: React.FC = () => {
     return null;
   }
 
-  const { dispatch, state } = context;
+  const {dispatch, state} = context;
   if (state.features.length === 0) {
     return null;
   }
@@ -52,7 +52,7 @@ export const ToggleFeatures: React.FC = () => {
               <input
                 type="checkbox"
                 onChange={() => {
-                  dispatch({ type: "toggle", feature: feature.name });
+                  dispatch({type: "toggle", feature: feature.name});
                 }}
                 checked={state.active.has(feature.name)}
               />
@@ -90,9 +90,10 @@ export const ToggleFeatures: React.FC = () => {
       >
         <button
           style={{
-            border: "1px solid gray",
-            fontSize: "110%",
-            borderRadius: "5px",
+            border: "none",
+            fontSize: "8px",
+            background: "transparent",
+            padding: "2px",
             cursor: "pointer"
           }}
         >
