@@ -121,7 +121,7 @@ prod builds, for example):
 Then, in the browser console, you can toggle features:
 
 ```js
-> window.features.enable("foo")
-> window.features.disable("foo")
+> window.feature.enable("foo")
+> window.feature.disable("foo")
 ```
 
