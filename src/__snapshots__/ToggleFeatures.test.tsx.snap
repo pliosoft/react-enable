@@ -1,0 +1,274 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders ToggleFeatures with correct checkboxes checked 1`] = `
+<aside
+  className="feature-flags"
+  style={
+    Object {
+      "alignContent": "stretch",
+      "alignItems": "stretch",
+      "background": "white",
+      "border": "1px solid gray",
+      "color": "black",
+      "display": "flex",
+      "flexDirection": "row",
+      "flexWrap": "nowrap",
+      "height": "300px",
+      "justifyContent": "space-between",
+      "left": "-198px",
+      "opacity": "0.6",
+      "position": "fixed",
+      "top": "100px",
+      "width": "220px",
+      "zIndex": 100000,
+    }
+  }
+>
+  <main
+    style={
+      Object {
+        "flexGrow": 1,
+        "overflow": "scroll",
+        "padding": "12px",
+      }
+    }
+  >
+    <div>
+      <label>
+        <input
+          checked={false}
+          onChange={[Function]}
+          type="checkbox"
+        />
+        A
+      </label>
+    </div>
+    <div>
+      <label>
+        <input
+          checked={false}
+          onChange={[Function]}
+          type="checkbox"
+        />
+        B
+      </label>
+    </div>
+  </main>
+  <div
+    onClick={[Function]}
+    style={
+      Object {
+        "alignItems": "center",
+        "background": "rgb(238, 238, 238)",
+        "cursor": "pointer",
+        "display": "flex",
+        "flexDirection": "row",
+        "flexGrow": 0,
+        "justifyContent": "space-between",
+        "padding": "10px 0",
+        "width": "24px",
+        "writingMode": "vertical-rl",
+      }
+    }
+  >
+    <button
+      style={
+        Object {
+          "background": "transparent",
+          "border": "none",
+          "cursor": "pointer",
+          "fontSize": "8px",
+          "padding": "2px",
+        }
+      }
+    >
+      🎛 Show
+    </button>
+    <span>
+      Dev Features Panel
+    </span>
+  </div>
+</aside>
+`;
+
+exports[`renders ToggleFeatures with correct checkboxes checked 2`] = `
+<aside
+  className="feature-flags"
+  style={
+    Object {
+      "alignContent": "stretch",
+      "alignItems": "stretch",
+      "background": "white",
+      "border": "1px solid gray",
+      "color": "black",
+      "display": "flex",
+      "flexDirection": "row",
+      "flexWrap": "nowrap",
+      "height": "300px",
+      "justifyContent": "space-between",
+      "left": "-198px",
+      "opacity": "0.6",
+      "position": "fixed",
+      "top": "100px",
+      "width": "220px",
+      "zIndex": 100000,
+    }
+  }
+>
+  <main
+    style={
+      Object {
+        "flexGrow": 1,
+        "overflow": "scroll",
+        "padding": "12px",
+      }
+    }
+  >
+    <div>
+      <label>
+        <input
+          checked={true}
+          onChange={[Function]}
+          type="checkbox"
+        />
+        A
+      </label>
+    </div>
+    <div>
+      <label>
+        <input
+          checked={false}
+          onChange={[Function]}
+          type="checkbox"
+        />
+        B
+      </label>
+    </div>
+  </main>
+  <div
+    onClick={[Function]}
+    style={
+      Object {
+        "alignItems": "center",
+        "background": "rgb(238, 238, 238)",
+        "cursor": "pointer",
+        "display": "flex",
+        "flexDirection": "row",
+        "flexGrow": 0,
+        "justifyContent": "space-between",
+        "padding": "10px 0",
+        "width": "24px",
+        "writingMode": "vertical-rl",
+      }
+    }
+  >
+    <button
+      style={
+        Object {
+          "background": "transparent",
+          "border": "none",
+          "cursor": "pointer",
+          "fontSize": "8px",
+          "padding": "2px",
+        }
+      }
+    >
+      🎛 Show
+    </button>
+    <span>
+      Dev Features Panel
+    </span>
+  </div>
+</aside>
+`;
+
+exports[`renders ToggleFeatures with correct checkboxes checked 3`] = `
+<aside
+  className="feature-flags"
+  style={
+    Object {
+      "alignContent": "stretch",
+      "alignItems": "stretch",
+      "background": "white",
+      "border": "1px solid gray",
+      "color": "black",
+      "display": "flex",
+      "flexDirection": "row",
+      "flexWrap": "nowrap",
+      "height": "300px",
+      "justifyContent": "space-between",
+      "left": "-198px",
+      "opacity": "0.6",
+      "position": "fixed",
+      "top": "100px",
+      "width": "220px",
+      "zIndex": 100000,
+    }
+  }
+>
+  <main
+    style={
+      Object {
+        "flexGrow": 1,
+        "overflow": "scroll",
+        "padding": "12px",
+      }
+    }
+  >
+    <div>
+      <label>
+        <input
+          checked={false}
+          onChange={[Function]}
+          type="checkbox"
+        />
+        A
+      </label>
+    </div>
+    <div>
+      <label>
+        <input
+          checked={false}
+          onChange={[Function]}
+          type="checkbox"
+        />
+        B
+      </label>
+    </div>
+  </main>
+  <div
+    onClick={[Function]}
+    style={
+      Object {
+        "alignItems": "center",
+        "background": "rgb(238, 238, 238)",
+        "cursor": "pointer",
+        "display": "flex",
+        "flexDirection": "row",
+        "flexGrow": 0,
+        "justifyContent": "space-between",
+        "padding": "10px 0",
+        "width": "24px",
+        "writingMode": "vertical-rl",
+      }
+    }
+  >
+    <button
+      style={
+        Object {
+          "background": "transparent",
+          "border": "none",
+          "cursor": "pointer",
+          "fontSize": "8px",
+          "padding": "2px",
+        }
+      }
+    >
+      🎛 Show
+    </button>
+    <span>
+      Dev Features Panel
+    </span>
+  </div>
+</aside>
+`;

@@ -1,9 +1,9 @@
-import {FeatureContext} from "./index";
 import React from "react";
+import { FeatureContext } from "./FeatureContext";
 
 // A GUI for toggling features that are configured by nearest `Features` parent.
 // might be put into a floating window that can be mounted in a portal, and then
-// dev users can toggle features.
+// dev users can toggle features. can be omitted, perhaps in prod builds.
 export const ToggleFeatures: React.FC = () => {
   const [showDrawer, setShowDrawer] = React.useState(false);
   const context = React.useContext(FeatureContext);
@@ -12,7 +12,7 @@ export const ToggleFeatures: React.FC = () => {
     return null;
   }
 
-  const {dispatch, state} = context;
+  const { dispatch, state } = context;
   if (state.features.length === 0) {
     return null;
   }
@@ -52,9 +52,9 @@ export const ToggleFeatures: React.FC = () => {
               <input
                 type="checkbox"
                 onChange={() => {
-                  dispatch({type: "toggle", feature: feature.name});
+                  dispatch({ type: "toggle", feature: feature.name });
                 }}
-                checked={state.active.has(feature.name)}
+                checked={state.currentEnabled.has(feature.name)}
               />
               {feature.name}
             </label>

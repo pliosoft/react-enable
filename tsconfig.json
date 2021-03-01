@@ -19,7 +19,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "declaration": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "declarationDir": "./@types",
     "esModuleInterop": true,
     "baseUrl": ".",
