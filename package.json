@@ -1,6 +1,6 @@
 {
   "name": "react-enable",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "feature flags to enable and disable functionality at runtime in a react application",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
@@ -33,14 +33,14 @@
   "homepage": "https://github.com/pliosoft/react-enable#readme",
   "peerDependencies": {
     "react": "^17",
-    "fp-ts": "^2.5",
+    "fp-ts": "^2.9",
     "tslib": "^1.11"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^5.1.0",
     "@types/jest": "^26.0.20",
     "@types/react": "^17",
-    "fp-ts": "^2.5",
+    "fp-ts": "^2.9",
     "jest": "^26.6.3",
     "react": "^17",
     "react-test-renderer": "^17",

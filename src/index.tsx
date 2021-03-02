@@ -5,6 +5,7 @@ export type { FeatureContextType } from "./FeatureContext";
 export { ToggleFeatures } from "./ToggleFeatures";
 export { Features } from "./Features";
 export { EnableContext } from "./EnableContext";
+export { Enable } from "./Enable";
 
 /**
  * returns true iff all specified features are enabled
