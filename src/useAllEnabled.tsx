@@ -6,5 +6,5 @@ import { testAndConvert } from "./utils";
 
 export function useAllEnabled(allFeatures: string | string[]) {
   let [test, queryAllPresent] = testAndConvert(allFeatures);
-  return queryAllPresent.every(test);
+  return queryAllPresent.length > 0 && queryAllPresent.every(test);
 }

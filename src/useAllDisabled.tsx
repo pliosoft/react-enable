@@ -6,5 +6,5 @@ import { testAndConvert } from "./utils";
 
 export function useAllDisabled(withoutAll: string | string[]) {
   let [test, queryAllWithout] = testAndConvert(withoutAll);
-  return queryAllWithout.every(x => !test(x));
+  return withoutAll.length > 0 && queryAllWithout.every(x => !test(x));
 }

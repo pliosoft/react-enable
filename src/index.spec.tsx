@@ -90,6 +90,21 @@ test("default-enabled should be enabled by default", () => {
   expect(r2.current).toBe(false);
 });
 
+test("all queries should be false for empty queries", () => {
+  const { result } = renderHook(
+    () => {
+      const f1 = useAllEnabled([]);
+      const f2 = useAllDisabled([]);
+      const x = React.useContext(FeatureContext);
+      return { f1, f2, g: x?.dispatch };
+    },
+    { wrapper }
+  );
+
+  expect(result.current.f1).toBe(false);
+  expect(result.current.f2).toBe(false);
+});
+
 test("feature should be enabled after enabling", () => {
   const { result } = renderHook(
     () => {
