@@ -56,9 +56,9 @@ const wrapper: React.FC<{ defaultEnabled: string[] }> = ({
   </Features>
 );
 
-test("without a feature, should fail", () => {
+test("without a feature, should be false", () => {
   const { result } = renderHook(() => useEnabled([]));
-  expect(result.error).toEqual(Error("Can't have empty array of features"));
+  expect(result.current).toEqual(false);
 });
 
 test("should be disabled without a context", () => {
