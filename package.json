@@ -2,14 +2,18 @@
   "name": "react-enable",
   "version": "2.0.1",
   "description": "feature flags to enable and disable functionality at runtime in a react application",
-  "main": "dist/index.js",
-  "types": "@types/index.d.ts",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "lib": "es2015",
+  "types": "./lib/esm/index.d.ts",
+  "files": [
+    "lib/"
+  ],
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
-    "tsc": "tsc"
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module commonjs --outDir lib/cjs",
+    "test": "npx jest --watch"
   },
   "repository": {
     "type": "git",
@@ -37,12 +41,11 @@
     "@types/jest": "^26.0.20",
     "@types/react": "^17",
     "fp-ts": "^2.5",
+    "jest": "^26.6.3",
     "react": "^17",
     "react-test-renderer": "^17",
+    "ts-jest": "^26.5.2",
     "tslib": "^1.11",
     "typescript": "^4.2"
-  },
-  "dependencies": {
-    "react-scripts": "^4.0.3"
   }
 }
