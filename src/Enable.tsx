@@ -2,8 +2,6 @@ import * as React from "react";
 import {
   useEnabled,
   useAllEnabled,
-  useAllDisabled,
-  useDisabled
 } from "./index";
 
 export interface EnableProps {
@@ -19,17 +17,15 @@ export interface EnableProps {
  */
 export const Enable: React.FC<EnableProps> = ({
   feature = [],
-  without = [],
   allFeatures = [],
-  withoutAll = [],
   children
 }) => {
   const isAny = useEnabled(feature);
   const isAll = useAllEnabled(allFeatures);
-  const isNoAll = useAllDisabled(withoutAll);
-  const isNoAny = useDisabled(without);
-  if ((isAny || isAll) && !(isNoAll || isNoAny)) {
+
+  if (isAny || isAll) {
     return <>{children}</>;
   }
+
   return null;
 };
