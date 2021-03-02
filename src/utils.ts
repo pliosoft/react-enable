@@ -9,7 +9,7 @@ export function testAndConvert(
   const test = React.useContext(EnableContext);
   // We memoize just to prevent re-renders since this could be at the leaf of a tree
   const converted = React.useMemo(
-    () => (input == null ? [] : (Array.isArray(input) ? input : [input])),
+    () => (input == null ? [] : Array.isArray(input) ? input : [input]),
     [input]
   );
   return [test, converted];
