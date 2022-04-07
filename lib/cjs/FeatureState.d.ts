@@ -1,6 +1,9 @@
 import * as React from "react";
 export declare const fromStrArray: (as: string[]) => Set<string>;
-export declare const elemStr: (a: string, set: Set<string>) => boolean;
+export declare const elemStr: {
+    (a: string): (set: Set<string>) => boolean;
+    (a: string, set: Set<string>): boolean;
+};
 export interface FeatureState {
     readonly features: Feature[];
     readonly forceEnable: Set<string>;
