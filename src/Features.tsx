@@ -1,137 +1,67 @@
-import * as React from "react";
-import { EnableContext } from "./EnableContext";
-import {
-  Feature,
-  DispatchFeature,
-  FeatureState,
-  fromStrArray,
-  reducer,
-  elemStr
-} from "./FeatureState";
-import { GlobalEnable } from "./GlobalEnable";
-import { FeatureContext } from "./FeatureContext";
+import * as React from 'react';
+import { EnableContext } from './EnableContext';
+import { FeatureContext } from './FeatureContext';
+import { FeatureDescription } from './FeatureState';
+import { useMachine } from '@xstate/react';
+import { FeaturesMachine } from './FeaturesState';
+import useConsoleOverride from './useConsoleOverride';
+import useTestCallback from './useTestCallback';
+import usePersist from './usePersist';
 
 interface FeatureProps {
-  readonly features: Feature[];
-  readonly defaultEnabled: string[];
-  readonly consoleOverride?: boolean;
+  readonly features: readonly FeatureDescription[];
+  readonly children: React.ReactNode;
+  readonly disableConsole?: boolean;
   readonly storage?: Storage;
 }
 
 /**
  * A more batteries-enabled parent component that keeps track of feature state
  * internally, and creates window.feature.enable("f") and window.feature.disable("f").
+ * Keeps track of overrides and defaults, with defaults potentially coming from your props
+ * and overrides being persisted to your choice of storage layer.
  */
-export const Features: React.FC<FeatureProps> = ({
+export function Features({
+  children,
   features,
-  defaultEnabled,
-  consoleOverride = false,
-  storage,
-  children
-}) => {
-  const initial: FeatureState = {
-    features,
-    forceDisable: fromStrArray([]),
-    forceEnable: fromStrArray([]),
-    defaultActive: fromStrArray(defaultEnabled),
-    currentEnabled: new Set()
-  };
-
-  const [state, dispatch] = React.useReducer(reducer, initial);
-  // console.debug("State: \n##> %o\n##> %o\n##> %o", state.forceEnable, state.forceDisable, state.defaultActive)
-
-  useLoad(storage, dispatch);
-  usePersist(state.forceEnable, state.forceDisable, storage);
-  useConsoleOverride(consoleOverride, dispatch);
+  disableConsole = false,
+  storage = window.sessionStorage,
+}: FeatureProps): JSX.Element {
+  // Capture only first value; we don't care about future updates
+  const featuresRef = React.useRef(features);
+  const [overridesState, overridesSend] = useMachine(FeaturesMachine);
+  const [defaultsState, defaultsSend] = useMachine(FeaturesMachine);
 
   React.useEffect(() => {
-    if (Array.isArray(defaultEnabled)) {
-      dispatch({ type: "set-default", defaultEnabled });
-    }
-  }, [dispatch, defaultEnabled]);
+    /// Load the user overrides
+    defaultsSend({ type: 'INIT', features: featuresRef.current });
+    overridesSend({ type: 'INIT', features: featuresRef.current });
+    return () => {
+      // Forget features if we change them
+      defaultsSend({ type: 'DE_INIT' });
+      overridesSend({ type: 'DE_INIT' });
+    };
+  }, [featuresRef]);
 
-  const featureValue = React.useMemo(() => ({ dispatch, state }), [
-    dispatch,
-    state,
-    state.defaultActive,
-    state.forceEnable,
-    state.forceDisable
-  ]);
+  usePersist(storage, overridesSend, featuresRef.current, overridesState);
 
-  const testCallback = React.useCallback(
-    (f: string) => elemStr(f, state.currentEnabled),
-    [state.currentEnabled]
+  const testCallback = useTestCallback([defaultsState, overridesState]);
+  useConsoleOverride(!disableConsole, featuresRef.current, testCallback, defaultsSend);
+
+  const featureValue = React.useMemo(
+    () => ({
+      send: overridesSend,
+      featuresDescription: featuresRef.current,
+      overridesState,
+      defaultsState,
+      test: testCallback,
+    }),
+    [overridesState, featuresRef, overridesSend, testCallback]
   );
 
   return (
     <FeatureContext.Provider value={featureValue}>
-      <EnableContext.Provider value={testCallback}>
-        {children}
-      </EnableContext.Provider>
+      <EnableContext.Provider value={testCallback}>{children}</EnableContext.Provider>
     </FeatureContext.Provider>
   );
-};
-
-function useConsoleOverride(
-  consoleOverride: boolean,
-  dispatch: DispatchFeature
-) {
-  React.useEffect(() => {
-    if (!consoleOverride) {
-      return () => {
-        /* empty */
-      };
-    }
-    window.feature = new GlobalEnable(dispatch);
-    return () => {
-      window.feature = undefined;
-    };
-  }, [dispatch]);
-}
-
-function useLoad(storage: Storage | undefined, dispatch: DispatchFeature) {
-  React.useEffect(() => {
-    if (storage != null) {
-      try {
-        const value = storage.getItem("react-enable:features");
-        if (value != null) {
-          const result = JSON.parse(value);
-          if (
-            Array.isArray(result.on) &&
-            Array.isArray(result.off) &&
-            typeof result.on[0] === "string" &&
-            typeof result.off[0] === "string"
-          ) {
-            dispatch({ type: "set-active", values: result });
-          }
-        }
-      } catch (e) {
-        // Can't parse or get
-      }
-    }
-  }, [storage]);
-}
-
-function usePersist(
-  forceEnable: Set<string>,
-  forceDisable: Set<string>,
-  storage: Storage | undefined
-) {
-  const strState =
-    storage == null
-      ? undefined
-      : JSON.stringify({
-          on: Array.from(forceEnable).sort(),
-          off: Array.from(forceDisable).sort()
-        });
-
-  React.useEffect(() => {
-    if (strState != null && storage != null) {
-      try {
-        storage.setItem("react-enable:features", strState);
-      } catch (e) {
-        // Can't set for some reason
-      }
-    }
-  }, [storage, strState]);
 }

@@ -4,55 +4,50 @@ Easy and fast way to toggle features in your project.
 
 Features include:
 
-* Toggle parts of your project dynamically or at startup
-* Built in state management for active features
-* Roll your own state manager using the minimal functional interface
+- Toggle parts of your project dynamically or at startup
+- Built in state management for active features
+- Roll your own state manager using the minimal functional interface
 
 ## Installation and usage
 
 To install,
 
 ```sh
-npm add --save react-enable react fp-ts
+npm add --save react-enable react
 ```
 
 Then most users will use it in the following manner:
 
-```js
-import React, { lazy } from 'react'
-import { Features, Enable } from 'react-enable'
+```typescript
+import React, { lazy } from 'react';
+import { Features, ToggleFeature, Disable, Enable, FeatureDescription } from 'react-enable';
 
-const NewVersion = lazy(() => import('./src/new-version'))
-const OldVersion = lazy(() => import('./src/old-version'))
+const NewVersion = lazy(() => import('./src/new-version'));
+const OldVersion = lazy(() => import('./src/old-version'));
 
-// All available features should be declared up-front
-const FEATURES : Feature[] = [
-  { name: "fancy-feature" }
-]
+// All available features should be declared up-front, with default values
+const FEATURES: FeatureDescription[] = [{ name: 'v2', defaultValue: true }];
 
-// Perhaps from backend, or from build environment
-const ENABLED = ["fancy-feature"]
-
-const RestOfApp : FC = () => {
+function RestOfApp(): JSX.Element {
   return (
     <div>
-      <Enable feature="fancy-feature">
+      <Enable feature="v2">
         <NewVersion />
       </Enable>
-      <Disable feature="fancy-feature">
+      <Disable feature="v2">
         <OldVersion />
       </Disable>
     </div>
-  )
+  );
 }
 
-const App : FC = () => {
+function App(): JSX.Element {
   return (
-    <Features features={FEATURES} defaultEnabled={ENABLED}>
+    <Features features={FEATURES}>
       <RestOfApp />
       <ToggleFeatures />
     </Features>
-  )
+  );
 }
 ```
 
@@ -62,43 +57,52 @@ const App : FC = () => {
 
 Provides state and context for managing a set of features.
 
-props:
+Available props:
 
-- `features: Feature[]`: list of available features.
-- `defaultEnabled`: list of enabled features at startup. Does not update after mount.
+- `features: FeatureDescription[]`: description of available features.
+- `disableConsole?: boolean`: indicate the console API
+  should not be enabled (default false)
+- `storage?: Storage`: where to persist
+  overrides (default `window.sessionStorage`)
 
 ### `Enabled` and `Disabled` components
 
 Render children depending on which set of features are active.
 
-props:
+Props:
 
-- `feature: string | string[]`: if one of these is enabled, the children will render (or not, with Disabled)
-- `allFeatures: string[]`: only if all of the specified features are enabled will it render children (or not, with Disabled)
+- `feature: string | string[]`: if one of these is enabled,
+  the children will render (or not, with Disabled)
+- `allFeatures: string[]`: only if all the specified features are
+  enabled will it render children (or not, with Disabled)
 
 ### Hooks
 
-- `useEnabled(features: string | string[])`: return true iff any specified features are enabled.
-- `useAllEnabled(features: string | string[])`:  return true iff all specified features are enabled.
-- `useAllDisabled(features: string | string[])`: return true iff all specified features are disabled.
-- `useDisabled(features: string | string[])`: return true iff any specified features are disabled.
+- `useEnabled(features: string | string[])`: return true
+  if any specified features are enabled.
+- `useAllEnabled(features: string | string[])`: return true
+  if all specified features are enabled.
+- `useAllDisabled(features: string | string[])`: return true
+  if all specified features are disabled.
+- `useDisabled(features: string | string[])`: return true
+  iff any specified features are disabled.
 
 ### `ToggleFeatures` component
 
-Renders all current features specified in `Features`, 
- and whether they are enabled or disabled,
-  with checkboxes to toggle them.
-Rendered html has class `toggle-features` for custom styling. 
+Renders all current features specified in `Features`,
+and whether they are enabled or disabled,
+with checkboxes to toggle them.
+Rendered HTML has class `toggle-features` for custom styling.
 You might use this in a Portal,
- and style it to float on top of the screen in developer builds.
+and style it to float on top of the screen in developer builds.
 
 ### `EnableContext` component
 
-This component can be used if you want to do your own state management 
- or custom feature storage.
-Instead of using `Features`, 
- you would wrap your tree, 
- providing a custom test function.
+This component can be used if you want to do your own state management
+or custom feature storage.
+Instead of using `Features`,
+you would wrap your tree,
+providing a custom test function.
 
 ```js
   return (
@@ -110,25 +114,35 @@ Instead of using `Features`,
 
 ### `console` Interface
 
-In addition to `ToggleFeatures`, 
- it is possible to toggle features on the console, 
-  if configured. 
-To enable pass a boolean to `consoleOverride` prop 
- (you might want to feed this from an environment variable for dev vs prod builds, for example):
+In addition to `ToggleFeatures`,
+it is possible to toggle features on the console,
+if configured.
+To enable pass a boolean to `consoleOverride` prop
+(you might want to feed this from an environment variable for
+dev vs prod builds, for example):
 
 ```js
-    <Features features={FEATURES} enabled={ENABLED} consoleOverride={true}>
-      <RestOfApp />
-    </Features>
+<Features features={FEATURES}>
+  <RestOfApp />
+</Features>
 ```
 
-Then in the browser console, 
- you can toggle features:
+Then in the browser console,
+you can use features:
 
 ```js
-> window.feature.enable("foo")
-> window.feature.disable("foo")
+// toggle feature from enabled<->disabled, unset->enabled
+window.feature.toggle('foo');
+
+// force to enabled or disabled, respectively
+window.feature.enable('foo');
+window.feature.disable('foo');
+
+// Unset the override, and hence let the default take over
+window.feature.unset('foo');
+
+// show all configured feature names and the current state of the feature
+window.feature.listFeatures();
 ```
 
 This can be useful for toggling features in production builds.
-

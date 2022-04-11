@@ -1,149 +1,160 @@
-import { insert, remove, elem, intersection, fromArray } from "fp-ts/lib/Set";
-import * as React from "react";
-import { eqString } from "fp-ts/lib/Eq";
-import { some, none } from "fp-ts/lib/Option";
-import { filterMap } from "fp-ts/lib/Array";
+import { assign, createMachine, InterpreterFrom, StateFrom } from 'xstate';
 
-export const fromStrArray = fromArray(eqString);
-const insertStr = insert(eqString);
-const removeStr = remove(eqString);
-export const elemStr = elem(eqString);
-const intersectStr = intersection(eqString);
+/**
+ * Feature is either on, off, or 'unset',
+ * which means it will go to the default value or the less specific value.
+ */
+export type FeatureValue = true | false | undefined;
 
-export interface FeatureState {
-  readonly features: Feature[];
-  readonly forceEnable: Set<string>;
-  readonly forceDisable: Set<string>;
-  readonly defaultActive: Set<string>;
-  readonly currentEnabled: Set<string>;
+export type FeatureState = StateFrom<typeof FeatureMachine>;
+export type FeatureDispatch = InterpreterFrom<typeof FeatureMachine>['send'];
+
+/// Given a featurestate, determine the value (on, off, or unset)
+export function valueForState(featureState: FeatureState): [FeatureValue, boolean] {
+  return [
+    featureState.matches('enabled') ? true : featureState.matches('disabled') ? false : undefined,
+    featureState.context.featureDesc?.force ?? false,
+  ];
 }
 
-export interface Feature {
-  readonly name: string;
+/**
+ * Definition of a feature that can be enabled or disabled.
+ * K is the type of the key that is used to identify the feature.
+ * T describes the type of tag that is used to organize the features.
+ */
+export interface FeatureDescription<K extends string = string> {
+  readonly name: K;
   readonly description?: string;
+
+  /// if set true, will force the field to what it is set here through layers of states.
+  /// Has no effect if the features machine is not nested.
+  /// For instance, the "dev" layer can force a dev feature on.
+  /// Similar to !important in CSS.
+  readonly force?: boolean;
+
+  /// If set to true, the feature will not be overridable by the user.
+  readonly noOverride?: boolean;
+
+  /// can be used to specify what should happen if the feature is not set to a particular value.
+  readonly defaultValue?: FeatureValue;
 }
 
-interface DisableFeature {
-  type: "disable";
-  readonly feature: string;
+interface FeatureContext {
+  featureDesc?: FeatureDescription;
 }
 
-interface ToggleFeature {
-  type: "toggle";
-  readonly feature: string;
-}
-
-interface SetDefaultFeatures {
-  type: "set-default";
-  readonly defaultEnabled: string[];
-}
-
-interface EnableFeature {
-  type: "enable";
-  readonly feature: string;
-}
-
-interface SetActiveFeatures {
-  type: "set-active";
-  readonly values: {
-    on: string[];
-    off: string[];
-  };
-}
-
-export type EnableAction =
-  | EnableFeature
-  | DisableFeature
-  | ToggleFeature
-  | SetDefaultFeatures
-  | SetActiveFeatures;
-
-function getTest(state: FeatureState): (feature: string) => boolean {
-  return feature => {
-    const defaultEnabled = elemStr(feature, state.defaultActive);
-    const forceOn = elemStr(feature, state.forceEnable);
-    const forceOff = elemStr(feature, state.forceDisable);
-    return forceOn || (defaultEnabled && !forceOff);
-  };
-}
-
-function computeEnabled(state: FeatureState): FeatureState {
-  const test = getTest(state);
-  const getEnabledFeatures = filterMap<Feature, string>(a =>
-    test(a.name) ? some(a.name) : none
-  );
-  return {
-    ...state,
-    currentEnabled: fromStrArray(getEnabledFeatures(state.features))
-  };
-}
-
-export const reducer: React.Reducer<FeatureState, EnableAction> = (
-  state,
-  action
-) => {
-  // console.debug("REDUCE: \n++> %o\n++>%o\n ==> %o", state.forceDisable, state.forceDisable, action)
-  switch (action.type) {
-    case "enable": {
-      if (!state.features.some(x => x.name === action.feature)) {
-        return state;
-      }
-      const enableAction = state.defaultActive.has(action.feature)
-        ? removeStr(action.feature)
-        : insertStr(action.feature);
-      const disableAction = removeStr(action.feature);
-      return computeEnabled({
-        ...state,
-        forceEnable: enableAction(state.forceEnable),
-        forceDisable: disableAction(state.forceEnable)
-      });
+type FeatureTypeState =
+  | {
+      value: 'initial';
+      context: never;
     }
-
-    case "disable": {
-      if (!state.features.some(x => x.name === action.feature)) {
-        return state;
-      }
-      return computeEnabled({
-        ...state,
-        forceEnable: removeStr(action.feature)(state.forceEnable),
-        forceDisable: insertStr(action.feature)(state.forceEnable)
-      });
+  | {
+      value: 'unspecied';
+      context: FeatureContext;
     }
-
-    case "toggle": {
-      if (!state.features.some(x => x.name === action.feature)) {
-        return state;
-      }
-      const current = elemStr(action.feature, state.defaultActive)
-        ? !elemStr(action.feature, state.forceDisable)
-        : elemStr(action.feature, state.forceEnable);
-      return reducer(state, {
-        type: current ? "disable" : "enable",
-        feature: action.feature
-      });
+  | {
+      value: 'enabled';
+      context: FeatureContext;
     }
+  | {
+      value: 'disabled';
+      context: FeatureContext;
+    };
 
-    case "set-default": {
-      return computeEnabled({
-        ...state,
-        defaultActive: fromStrArray(action.defaultEnabled)
-      });
-    }
+/**
+ * Actions that can be performed on a feature.
+ */
+export type FeatureAction =
+  | { type: 'INIT'; feature: FeatureDescription }
+  | { type: 'ENABLE' }
+  | { type: 'DISABLE' }
+  | { type: 'TOGGLE' }
+  | { type: 'SET'; value: FeatureValue }
+  | { type: 'UNSET' };
 
-    case "set-active": {
-      const proposedOn = fromStrArray(action.values.on);
-      const proposedOff = fromStrArray(action.values.off);
-      const possible = fromStrArray(state.features.map(x => x.name));
-      return computeEnabled({
-        ...state,
-        forceEnable: intersectStr(proposedOn, possible),
-        forceDisable: intersectStr(proposedOff, possible)
-      });
-    }
+/**
+ * Fully describe the states a feature can be in
+ */
+export const FeatureMachine = createMachine<FeatureContext, FeatureAction, FeatureTypeState>({
+  id: 'feature',
+  initial: 'initial',
+  context: {},
+  states: {
+    initial: {
+      on: {
+        INIT: [
+          {
+            actions: assign({ featureDesc: (_, e) => e.feature }),
+            target: 'enabled',
+            cond: (_, e) => e.feature.defaultValue === true,
+          },
+          {
+            actions: assign({ featureDesc: (_, e) => e.feature }),
+            target: 'unspecified',
+            cond: (_, e) => e.feature.defaultValue === undefined,
+          },
+          {
+            actions: assign({ featureDesc: (_, e) => e.feature }),
+            target: 'disabled',
+            cond: (_, e) => e.feature.defaultValue === false,
+          },
+        ],
+      },
+    },
 
-    default:
-      throw new Error("Unsupported action");
-  }
-};
+    unspecified: {
+      on: {
+        ENABLE: 'enabled',
+        TOGGLE: 'enabled',
+        DISABLE: 'disabled',
+        UNSET: 'unspecified',
+        SET: [
+          {
+            target: 'enabled',
+            cond: (_, e) => e.value === true,
+          },
+          {
+            target: 'disabled',
+            cond: (_, e) => e.value === false,
+          },
+        ],
+      },
+    },
 
-export type DispatchFeature = React.Dispatch<EnableAction>;
+    disabled: {
+      on: {
+        ENABLE: 'enabled',
+        TOGGLE: 'disabled',
+        UNSET: 'unspecified',
+        SET: [
+          {
+            target: 'enabled',
+            cond: (_, e) => e.value === true,
+          },
+          {
+            target: 'unspecified',
+            cond: (_, e) => e.value === undefined,
+          },
+        ],
+      },
+    },
+
+    enabled: {
+      on: {
+        DISABLE: 'disabled',
+        TOGGLE: 'enabled',
+        UNSET: 'unspecified',
+        SET: [
+          {
+            target: 'disabled',
+            cond: (_, e) => e.value === false,
+          },
+          {
+            target: 'unspecified',
+            cond: (_, e) => e.value === undefined,
+          },
+        ],
+      },
+    },
+  },
+});
