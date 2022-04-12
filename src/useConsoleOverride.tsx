@@ -1,15 +1,16 @@
-import * as React from 'react';
-import { GlobalEnable } from './GlobalEnable';
-import { FeatureDescription, FeatureValue } from './FeatureState';
+import { useEffect } from 'react';
+
 import { FeaturesDispatch } from './FeaturesState';
+import { FeatureDescription, FeatureValue } from './FeatureState';
+import { GlobalEnable } from './GlobalEnable';
 
 export default function useConsoleOverride(
   consoleOverride: boolean,
   features: readonly FeatureDescription[],
   testFeature: (_: string) => FeatureValue,
   dispatch: FeaturesDispatch
-) {
-  React.useEffect(() => {
+): void {
+  useEffect(() => {
     if (!consoleOverride) {
       return () => {
         /* empty */
@@ -21,5 +22,5 @@ export default function useConsoleOverride(
         delete window.feature;
       }
     };
-  }, [features, dispatch]);
+  }, [features, dispatch, consoleOverride, testFeature]);
 }

@@ -1,54 +1,37 @@
-import * as React from 'react';
-import { FeatureDescription, FeatureValue } from './FeatureState';
-import { FeaturesDispatch, FeaturesState, valueOfFeature } from './FeaturesState';
+import { useMemo, useEffect } from 'react';
 
-const KEY = 'react-enable:feature-values';
+import { FeaturesState, valueOfFeature } from './FeaturesState';
+import { FeatureDescription, FeatureValue } from './FeatureState';
+
+export const KEY = 'react-enable:feature-values';
 
 export default function usePersist(
   storage: Storage | undefined,
-  dispatch: FeaturesDispatch,
   features: readonly FeatureDescription[],
   overrideState: FeaturesState
-) {
-  useLoad(storage, dispatch);
-  const overrides = React.useMemo(() => {
-    const overrides: { [key: string]: FeatureValue } = {};
-    for (const feature of features) {
-      const [value] = valueOfFeature(overrideState, feature.name);
-      if (value != null) {
-        overrides[feature.name] = value;
+): void {
+  const overrides = useMemo(() => {
+    const newOverrides: { [key: string]: FeatureValue } = {};
+    if (overrideState.matches('ready')) {
+      for (const feature of features) {
+        const [value] = valueOfFeature(overrideState, feature.name);
+        if (value != null) {
+          newOverrides[feature.name] = value;
+        }
       }
     }
-    return overrides;
+    return newOverrides;
   }, [features, overrideState]);
 
-  const strState = Object.keys(overrides).length === 0 || storage == null ? undefined : JSON.stringify({ overrides });
+  const strState = Object.keys(overrides).length === 0 || storage == null ? '{}' : JSON.stringify({ overrides });
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
-      if (strState != null && storage != null) {
+      if (storage != null && overrideState.matches('ready')) {
         storage.setItem(KEY, strState);
-      } else if (strState == null && storage != null) {
-        storage.removeItem(KEY);
       }
     } catch (e) {
       // Can't set for some reason
     }
-  }, [storage, strState]);
-}
-
-function useLoad(storage: Storage | undefined, dispatch: FeaturesDispatch) {
-  React.useEffect(() => {
-    if (storage != null) {
-      try {
-        const featuresJson = storage.getItem(KEY);
-        if (featuresJson != null) {
-          const features = JSON.parse(featuresJson);
-          dispatch({ type: 'SET_ALL', features });
-        }
-      } catch (e) {
-        // Can't parse or get or otherwise; ignore
-      }
-    }
-  }, [dispatch, storage]);
+  }, [overrideState, storage, strState]);
 }

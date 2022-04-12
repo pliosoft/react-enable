@@ -1,13 +1,10 @@
-import * as React from "react";
-import { renderHook, act } from "@testing-library/react-hooks";
-import {
-  useEnabled,
-  useDisabled,
-  useAllEnabled,
-  useAllDisabled
-} from "./index";
-import { Features } from "./Features";
-import { FeatureContext } from "./FeatureContext";
+import * as React from 'react';
+
+import { renderHook, act } from '@testing-library/react-hooks';
+
+import { FeatureContext } from './FeatureContext';
+import { Features } from './Features';
+import { useEnabled, useDisabled, useAllEnabled, useAllDisabled } from './index';
 
 class LocalStorageMock {
   store: Record<string, string>;
@@ -22,7 +19,7 @@ class LocalStorageMock {
   }
 
   getItem(key: string) {
-    return this.store[key] || null;
+    return this.store[key] ?? null;
   }
 
   setItem(key: string, value: string) {
@@ -30,6 +27,7 @@ class LocalStorageMock {
   }
 
   removeItem(key: string) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this.store[key];
   }
 
@@ -39,344 +37,212 @@ class LocalStorageMock {
   }
 }
 
-const wrapper: React.FC<{ defaultEnabled: string[] }> = ({
-  children,
-  defaultEnabled = []
-}) => (
-  <Features
-    features={[
-      { name: "Feature 1", description: "Feature 1 is the feature" },
-      { name: "Feature 2", description: "Feature 2 is the feature" },
-      { name: "Feature 3", description: "Feature 3 is the feature" },
-      { name: "Default Enabled", description: "Enabled by default" }
-    ]}
-    defaultEnabled={defaultEnabled}
-  >
-    {children}
-  </Features>
-);
+const featuresA = [
+  {
+    name: 'Feature 1',
+    description: 'Feature 1 is the feature',
+    defaultValue: false,
+  },
+  {
+    name: 'Feature 2',
+    description: 'Feature 2 is the feature',
+    defaultValue: false,
+  },
+  {
+    name: 'Feature 3',
+    description: 'Feature 3 is the feature',
+    defaultValue: false,
+  },
+  {
+    name: 'Default Enabled',
+    description: 'Enabled by default',
+    defaultValue: false,
+  },
+];
 
-test("without a feature, should be false", () => {
-  const { result } = renderHook(() => useEnabled([]));
-  expect(result.current).toEqual(false);
-});
+const featuresB = [
+  {
+    name: 'Feature 1',
+    description: 'Feature 1 is the feature',
+    defaultValue: false,
+  },
+  {
+    name: 'Feature 2',
+    description: 'Feature 2 is the feature',
+    defaultValue: false,
+  },
+  {
+    name: 'Feature 3',
+    description: 'Feature 3 is the feature',
+    defaultValue: false,
+  },
+  {
+    name: 'Default Enabled',
+    description: 'Enabled by default',
+    defaultValue: true,
+  },
+];
 
-test("should be disabled without a context", () => {
-  const { result: r1 } = renderHook(() => useEnabled("Feature 1"));
-  const { result: r2 } = renderHook(() => useDisabled("Feature 1"));
-  expect(r1.current).toBe(false);
-  expect(r2.current).toBe(true);
-});
-
-test("feature should be disabled by default", () => {
-  const { result: r1 } = renderHook(() => useEnabled("Feature 1"), { wrapper });
-  const { result: r2 } = renderHook(() => useDisabled("Feature 1"), {
-    wrapper
-  });
-  expect(r1.current).toBe(false);
-  expect(r2.current).toBe(true);
-});
-
-test("default-enabled should be enabled by default", () => {
-  const { result: r1 } = renderHook(() => useEnabled("Default Enabled"), {
-    wrapper,
-    initialProps: { defaultEnabled: ["Default Enabled"] }
-  });
-  const { result: r2 } = renderHook(() => useDisabled("Default Enabled"), {
-    wrapper,
-    initialProps: { defaultEnabled: ["Default Enabled"] }
-  });
-  expect(r1.current).toBe(true);
-  expect(r2.current).toBe(false);
-});
-
-test("all queries should be false for empty queries", () => {
-  const { result } = renderHook(
-    () => {
-      const f1 = useAllEnabled([]);
-      const f2 = useAllDisabled([]);
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, g: x?.dispatch };
-    },
-    { wrapper }
-  );
-
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(false);
-});
-
-test("feature should be enabled after enabling", () => {
-  const { result } = renderHook(
-    () => {
-      const f1 = useEnabled("Feature 1");
-      const f2 = useDisabled("Feature 1");
-      const f3 = useEnabled("Feature 2");
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, f3, g: x?.dispatch };
-    },
-    { wrapper }
-  );
-
-  expect(result.current.f3).toBe(false);
-
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "enable", feature: "Feature 1" });
-    }
+describe('Basic Features', () => {
+  it('without a feature, should be false', () => {
+    const { result } = renderHook(() => useEnabled([]));
+    expect(result.current).toEqual(false);
   });
 
-  expect(result.current.f1).toBe(true);
-  expect(result.current.f2).toBe(false);
-  expect(result.current.f3).toBe(false);
-});
-
-test("default-enabled should be possible to disable", () => {
-  const { result } = renderHook(
-    () => {
-      const f1 = useEnabled("Default Enabled");
-      const f2 = useDisabled("Default Enabled");
-      const f3 = useEnabled("Feature 2");
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, f3, g: x?.dispatch };
-    },
-    { wrapper, initialProps: { defaultEnabled: ["Default Enabled"] } }
-  );
-
-  expect(result.current.f1).toBe(true);
-  expect(result.current.f2).toBe(false);
-  expect(result.current.f3).toBe(false);
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "disable", feature: "Default Enabled" });
-    }
+  it('should be disabled without a context', () => {
+    const { result: r1 } = renderHook(() => useEnabled('Feature 1'));
+    const { result: r2 } = renderHook(() => useDisabled('Feature 1'));
+    expect(r1.current).toBe(false);
+    expect(r2.current).toBe(true);
   });
 
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
-  expect(result.current.f3).toBe(false);
-});
-
-test("feature should be enabled after toggling", () => {
-  const { result } = renderHook(
-    () => {
-      const f1 = useEnabled("Feature 1");
-      const f2 = useDisabled("Feature 1");
-      const f3 = useEnabled("Feature 2");
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, f3, g: x?.dispatch };
-    },
-    { wrapper }
-  );
-
-  expect(result.current.f3).toBe(false);
-
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "disable", feature: "Feature 1" });
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-    }
+  it('feature should be disabled by default', () => {
+    const { result: r1, unmount: u1 } = renderHook(() => useEnabled('Feature 1'), {
+      wrapper: Features,
+      initialProps: { features: featuresA },
+    });
+    u1();
+    const { result: r2 } = renderHook(() => useDisabled('Feature 1'), {
+      wrapper: Features,
+      initialProps: {
+        features: featuresA,
+      },
+    });
+    expect(r1.current).toBe(false);
+    expect(r2.current).toBe(true);
   });
 
-  expect(result.current.f1).toBe(true);
-  expect(result.current.f2).toBe(false);
-  expect(result.current.f3).toBe(false);
-});
-
-test("feature should be disable after toggling twice", () => {
-  const { result } = renderHook(
-    () => {
-      const f1 = useEnabled("Feature 1");
-      const f2 = useDisabled("Feature 1");
-      const f3 = useEnabled("Feature 2");
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, f3, g: x?.dispatch };
-    },
-    { wrapper }
-  );
-
-  expect(result.current.f3).toBe(false);
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
-
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-    }
+  it('default-enabled should be enabled by default', () => {
+    const { result: r1, unmount: u1 } = renderHook(() => useEnabled('Default Enabled'), {
+      wrapper: Features,
+      initialProps: { features: featuresB },
+    });
+    u1();
+    const { result: r2, unmount: u2 } = renderHook(() => useDisabled('Default Enabled'), {
+      wrapper: Features,
+      initialProps: { features: featuresB },
+    });
+    expect(r1.current).toBe(true);
+    expect(r2.current).toBe(false);
+    u2();
   });
 
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
-  expect(result.current.f3).toBe(false);
-});
+  it('changes are persisted', () => {
+    const storage = new LocalStorageMock();
 
-test("checking for any feature enabled", () => {
-  const { result } = renderHook(
-    () => {
-      const f1 = useEnabled(["Feature 1", "Feature 2"]);
-      const f2 = useDisabled(["Feature 1", "Feature 2"]);
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, g: x?.dispatch };
-    },
-    { wrapper }
-  );
+    const { result: r1, unmount: u1 } = renderHook(
+      () => {
+        const f1 = useEnabled('Feature 1');
+        const f2 = useDisabled('Feature 2');
+        const f3 = useEnabled('Feature 3');
+        const x = React.useContext(FeatureContext);
+        return { f1, f2, f3, g: x?.overridesSend };
+      },
+      { wrapper: Features, initialProps: { features: featuresA, storage: storage } }
+    );
 
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-    }
-  });
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
+    expect(r1.current.f1).toBe(false);
+    expect(r1.current.f2).toBe(true);
+    expect(r1.current.f3).toBe(false);
 
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "toggle", feature: "Feature 2" });
-    }
-  });
+    act(() => {
+      if (r1.current.g != null) {
+        r1.current.g({ type: 'TOGGLE', name: 'Feature 1' });
+        r1.current.g({ type: 'TOGGLE', name: 'Feature 2' });
+        r1.current.g({ type: 'TOGGLE', name: 'Feature 3' });
+      }
+    });
 
-  expect(result.current.f1).toBe(true);
-  expect(result.current.f2).toBe(true);
+    expect(r1.current.f1).toBe(true);
+    expect(r1.current.f2).toBe(false);
+    expect(r1.current.f3).toBe(true);
 
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-    }
-  });
+    u1();
 
-  expect(result.current.f1).toBe(true);
-  expect(result.current.f2).toBe(false);
-});
+    const { result: r2, unmount: u2 } = renderHook(
+      () => {
+        const f1 = useEnabled('Feature 1');
+        const f2 = useDisabled('Feature 2');
+        const f3 = useEnabled('Feature 3');
+        const x = React.useContext(FeatureContext);
+        return { f1, f2, f3, g: x?.overridesSend };
+      },
+      { wrapper: Features, initialProps: { features: featuresA, storage: storage } }
+    );
 
-test("checking for all features enabled", () => {
-  const { result } = renderHook(
-    () => {
-      const f1 = useAllEnabled(["Feature 1", "Feature 2"]);
-      const f2 = useAllDisabled(["Feature 1", "Feature 2"]);
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, g: x?.dispatch };
-    },
-    { wrapper }
-  );
-
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-    }
-  });
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
-
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "toggle", feature: "Feature 2" });
-    }
+    expect(r2.current.f1).toBe(r1.current.f1);
+    expect(r2.current.f2).toBe(r1.current.f2);
+    expect(r2.current.f3).toBe(r1.current.f3);
+    expect(storage.getItem('react-enable:feature-values')).toEqual(
+      '{"overrides":{"Feature 1":true,"Feature 2":true,"Feature 3":true}}'
+    );
+    u2();
   });
 
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(false);
+  it('all queries should be false for empty queries', () => {
+    const { result, unmount } = renderHook(
+      () => {
+        const f1 = useAllEnabled([]);
+        const f2 = useAllDisabled([]);
+        return { f1, f2 };
+      },
+      { wrapper: Features, initialProps: { features: featuresA } }
+    );
 
-  act(() => {
-    if (result.current.g) {
-      result.current.g({ type: "toggle", feature: "Feature 1" });
-    }
+    expect(result.current.f1).toBe(false);
+    expect(result.current.f2).toBe(false);
+    unmount();
   });
 
-  expect(result.current.f1).toBe(true);
-  expect(result.current.f2).toBe(false);
-});
+  it('feature should be enabled after enabling', () => {
+    const { result, unmount } = renderHook(
+      () => {
+        const f1 = useEnabled('Feature 1');
+        const f2 = useDisabled('Feature 1');
+        const f3 = useEnabled('Feature 2');
+        const x = React.useContext(FeatureContext);
+        return { f1, f2, f3, g: x?.overridesSend };
+      },
+      { wrapper: Features, initialProps: { features: featuresA } }
+    );
 
-test("change default-enabled should change available features", () => {
-  const { result, rerender } = renderHook(
-    () => {
-      const f1 = useEnabled("Default Enabled");
-      const f2 = useDisabled("Default Enabled");
-      const f3 = useEnabled("Feature 2");
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, f3, g: x?.dispatch };
-    },
-    { wrapper, initialProps: { defaultEnabled: ["Default Enabled"] } }
-  );
+    expect(result.current.f3).toBe(false);
 
-  expect(result.current.f1).toBe(true);
-  expect(result.current.f2).toBe(false);
-  expect(result.current.f3).toBe(false);
+    act(() => {
+      if (result.current.g != null) {
+        result.current.g({ type: 'ENABLE', name: 'Feature 1' });
+      }
+    });
 
-  rerender({ defaultEnabled: ["Feature 2"] });
-
-  expect(result.current.f1).toBe(false);
-  expect(result.current.f2).toBe(true);
-  expect(result.current.f3).toBe(true);
-});
-
-test("changes are persisted", () => {
-  const storage = new LocalStorageMock();
-  const wrapper: React.FC<{ defaultEnabled: string[] }> = ({
-    children,
-    defaultEnabled = []
-  }) => (
-    <Features
-      storage={storage}
-      features={[
-        { name: "Feature 1", description: "Feature 1 is the feature" },
-        { name: "Feature 2", description: "Feature 2 is the feature" },
-        { name: "Feature 3", description: "Feature 3 is the feature" },
-        { name: "Default Enabled", description: "Enabled by default" }
-      ]}
-      defaultEnabled={defaultEnabled}
-    >
-      {children}
-    </Features>
-  );
-
-  const { result: r1 } = renderHook(
-    () => {
-      const f1 = useEnabled("Feature 1");
-      const f2 = useDisabled("Feature 2");
-      const f3 = useEnabled("Feature 3");
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, f3, g: x?.dispatch };
-    },
-    { wrapper, initialProps: { defaultEnabled: [] } }
-  );
-
-  expect(r1.current.f1).toBe(false);
-  expect(r1.current.f2).toBe(true);
-  expect(r1.current.f3).toBe(false);
-
-  act(() => {
-    if (r1.current.g) {
-      r1.current.g({ type: "toggle", feature: "Feature 1" });
-      r1.current.g({ type: "toggle", feature: "Feature 2" });
-      r1.current.g({ type: "toggle", feature: "Feature 3" });
-    }
+    expect(result.current.f1).toBe(true);
+    expect(result.current.f2).toBe(false);
+    expect(result.current.f3).toBe(false);
+    unmount();
   });
 
-  expect(r1.current.f1).toBe(true);
-  expect(r1.current.f2).toBe(false);
-  expect(r1.current.f3).toBe(true);
+  it('default-enabled should be possible to disable', () => {
+    const { result } = renderHook(
+      () => {
+        const f1 = useEnabled('Default Enabled');
+        const f2 = useDisabled('Default Enabled');
+        const f3 = useEnabled('Feature 2');
+        const x = React.useContext(FeatureContext);
+        return { f1, f2, f3, g: x?.overridesSend };
+      },
+      { wrapper: Features, initialProps: { features: featuresB } }
+    );
 
-  const { result: r2 } = renderHook(
-    () => {
-      const f1 = useEnabled("Feature 1");
-      const f2 = useDisabled("Feature 2");
-      const f3 = useEnabled("Feature 3");
-      const x = React.useContext(FeatureContext);
-      return { f1, f2, f3, g: x?.dispatch };
-    },
-    { wrapper, initialProps: { defaultEnabled: [] } }
-  );
+    expect(result.current.f1).toBe(true);
+    expect(result.current.f2).toBe(false);
+    expect(result.current.f3).toBe(false);
+    act(() => {
+      if (result.current.g != null) {
+        result.current.g({ type: 'DISABLE', name: 'Default Enabled' });
+      }
+    });
 
-  expect(r2.current.f1).toBe(true);
-  expect(r2.current.f2).toBe(false);
-  expect(r2.current.f3).toBe(true);
-  expect(storage.getItem("react-enable:features")).toEqual(
-    '{"on":["Feature 1","Feature 2","Feature 3"],"off":["Feature 1","Feature 2"]}'
-  );
+    expect(result.current.f1).toBe(false);
+    expect(result.current.f2).toBe(true);
+    expect(result.current.f3).toBe(false);
+  });
 });

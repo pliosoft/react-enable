@@ -1,4 +1,5 @@
-import * as React from 'react';
+import { createContext } from 'react';
+
 import { FeatureValue } from './FeatureState';
 
 export type EnableContextType = (feature: string) => FeatureValue;
@@ -6,4 +7,4 @@ export type EnableContextType = (feature: string) => FeatureValue;
 /**
  * Contained function can check whether a given feature is enabled.
  */
-export const EnableContext = React.createContext<EnableContextType>((_s) => false);
+export const EnableContext = createContext<EnableContextType>((_s) => false);

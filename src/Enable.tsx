@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { useEnabled } from './useEnabled';
+
 import { useAllEnabled } from './useAllEnabled';
+import { useEnabled } from './useEnabled';
 
 export interface EnableProps {
-  readonly feature?: string | string[];
+  readonly feature?: string[] | string;
   readonly allFeatures?: string[];
   children: React.ReactNode;
 }

@@ -1,16 +1,18 @@
-import * as React from 'react';
+import React, { useMemo, ReactNode, useEffect, useRef } from 'react';
+
+import { useMachine } from '@xstate/react';
+
 import { EnableContext } from './EnableContext';
 import { FeatureContext } from './FeatureContext';
-import { FeatureDescription } from './FeatureState';
-import { useMachine } from '@xstate/react';
 import { FeaturesMachine } from './FeaturesState';
+import { FeatureDescription } from './FeatureState';
 import useConsoleOverride from './useConsoleOverride';
+import usePersist, { KEY } from './usePersist';
 import useTestCallback from './useTestCallback';
-import usePersist from './usePersist';
 
 interface FeatureProps {
   readonly features: readonly FeatureDescription[];
-  readonly children: React.ReactNode;
+  readonly children?: ReactNode;
   readonly disableConsole?: boolean;
   readonly storage?: Storage;
 }
@@ -28,35 +30,60 @@ export function Features({
   storage = window.sessionStorage,
 }: FeatureProps): JSX.Element {
   // Capture only first value; we don't care about future updates
-  const featuresRef = React.useRef(features);
+  const featuresRef = useRef(features);
   const [overridesState, overridesSend] = useMachine(FeaturesMachine);
   const [defaultsState, defaultsSend] = useMachine(FeaturesMachine);
 
-  React.useEffect(() => {
-    /// Load the user overrides
-    defaultsSend({ type: 'INIT', features: featuresRef.current });
-    overridesSend({ type: 'INIT', features: featuresRef.current });
+  useEffect(() => {
+    /// Load defaults
+    defaultsSend({ type: 'INIT', features });
     return () => {
-      // Forget features if we change them
       defaultsSend({ type: 'DE_INIT' });
+    };
+  }, [defaultsSend, features]);
+
+  useEffect(() => {
+    let f: Record<string, boolean | undefined> = {};
+    if (storage != null) {
+      try {
+        const featuresJson = storage.getItem(KEY);
+        if (featuresJson != null) {
+          const fh = JSON.parse(featuresJson);
+          f = fh.overrides;
+        }
+      } catch (e) {
+        // Can't parse or get or otherwise; ignore
+        console.error('error in localStorage', e);
+      }
+    }
+
+    overridesSend({
+      type: 'INIT',
+      features: featuresRef.current
+        .filter((x) => x.noOverride !== true)
+        .map((x) => ({ name: x.name, description: x.description, defaultValue: f?.[x.name] ?? undefined })),
+    });
+
+    return () => {
       overridesSend({ type: 'DE_INIT' });
     };
-  }, [featuresRef]);
+  }, [featuresRef, overridesSend, storage]);
 
-  usePersist(storage, overridesSend, featuresRef.current, overridesState);
+  usePersist(storage, featuresRef.current, overridesState);
 
-  const testCallback = useTestCallback([defaultsState, overridesState]);
+  const testCallback = useTestCallback(overridesState, defaultsState);
   useConsoleOverride(!disableConsole, featuresRef.current, testCallback, defaultsSend);
 
-  const featureValue = React.useMemo(
+  const featureValue = useMemo(
     () => ({
-      send: overridesSend,
+      overridesSend,
+      defaultsSend,
       featuresDescription: featuresRef.current,
       overridesState,
       defaultsState,
       test: testCallback,
     }),
-    [overridesState, featuresRef, overridesSend, testCallback]
+    [overridesSend, defaultsSend, overridesState, defaultsState, testCallback]
   );
 
   return (

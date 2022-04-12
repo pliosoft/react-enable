@@ -1,13 +1,17 @@
-import * as React from 'react';
+import { createContext } from 'react';
+
 import { FeaturesDispatch, FeaturesState } from './FeaturesState';
 import { FeatureDescription, FeatureValue } from './FeatureState';
 
-export const FeatureContext = React.createContext<FeatureContextType | null>(null);
+export const FeatureContext = createContext<FeatureContextType | null>(null);
 
 /// Give access to the overrides layer
 export interface FeatureContextType {
   // Make changes to the overrides
-  send: FeaturesDispatch;
+  overridesSend: FeaturesDispatch;
+
+  // Make changes to defaults
+  defaultsSend: FeaturesDispatch;
 
   featuresDescription: readonly FeatureDescription[];
 

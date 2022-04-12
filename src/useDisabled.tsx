@@ -1,10 +1,9 @@
-import { testAndConvert } from "./utils";
+import { useTestAndConvert } from './utils';
 
 /**
  * returns true iff any specified feature is disabled
  */
-
-export function useDisabled(without: string | string[]) {
-  let [test, queryAnyWithout] = testAndConvert(without);
-  return queryAnyWithout.some(x => !test(x));
+export function useDisabled(without: string[] | string): boolean {
+  const [test, queryAnyWithout] = useTestAndConvert(without);
+  return queryAnyWithout.some((x) => !(test(x) ?? false));
 }

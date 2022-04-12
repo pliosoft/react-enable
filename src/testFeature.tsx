@@ -1,5 +1,5 @@
-import { FeatureValue } from './FeatureState';
 import { FeaturesState, valueOfFeature } from './FeaturesState';
+import { FeatureValue } from './FeatureState';
 
 /** Determine if the feature is enabled in one of the state machines, in order
  *

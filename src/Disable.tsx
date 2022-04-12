@@ -1,7 +1,8 @@
 import * as React from "react";
-import { useDisabled } from "./useDisabled";
-import { useAllDisabled } from "./useAllDisabled";
+
 import { EnableProps } from "./Enable";
+import { useAllDisabled } from "./useAllDisabled";
+import { useDisabled } from "./useDisabled";
 
 /**
  * Feature will be disabled if any in the list are enabled

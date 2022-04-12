@@ -1,5 +1,5 @@
-import { ActorRefFrom, InterpreterFrom, StateFrom } from 'xstate';
-import { assign, createMachine, spawn } from 'xstate';
+import { ActorRefFrom, InterpreterFrom, StateFrom, assign, createMachine, spawn } from 'xstate';
+
 import { FeatureMachine, FeatureDescription, FeatureValue, valueForState } from './FeatureState';
 
 export interface FeaturesContext {
@@ -12,20 +12,27 @@ export interface FeaturesContext {
 }
 
 export type FeaturesAction =
-  | { type: 'ENABLE'; name: string }
-  | { type: 'TOGGLE'; name: string }
-  | { type: 'SET_ALL'; features: { [key: string]: FeatureValue } }
-  | { type: 'INIT'; features: readonly FeatureDescription[] }
+  | { type: 'DE_INIT' }
   | { type: 'DISABLE'; name: string }
-  | { type: 'UNSET'; name: string }
-  | { type: 'DE_INIT' };
+  | { type: 'ENABLE'; name: string }
+  | { type: 'INIT'; features: readonly FeatureDescription[] }
+  | { type: 'SET_ALL'; features: { [key: string]: FeatureValue } }
+  | { type: 'SET'; name: string; value: FeatureValue }
+  | { type: 'TOGGLE'; name: string }
+  | { type: 'UNSET'; name: string };
 
-export type FeaturesTypeState = { value: 'ready'; context: FeaturesContext };
+export interface FeaturesTypeState {
+  value: 'ready';
+  context: FeaturesContext;
+}
 
 export type FeaturesState = StateFrom<typeof FeaturesMachine>;
 export type FeaturesDispatch = InterpreterFrom<typeof FeaturesMachine>['send'];
 
 export function valueOfFeature(featuresState: FeaturesState, feature: string): [FeatureValue, boolean] {
+  if (featuresState.context.features[feature] == null) {
+    return [undefined, false];
+  }
   const featureState = featuresState.context.features[feature].getSnapshot();
   if (featureState != null) {
     return valueForState(featureState);
@@ -52,7 +59,7 @@ export const FeaturesMachine = createMachine<FeaturesContext, FeaturesAction, Fe
 
               for (const feature of event.features) {
                 features[feature.name] = spawn(FeatureMachine, {
-                  name: 'feature-' + feature.name,
+                  name: feature.name,
                   sync: true,
                 });
                 features[feature.name].send({ type: 'INIT', feature });
@@ -79,6 +86,16 @@ export const FeaturesMachine = createMachine<FeaturesContext, FeaturesAction, Fe
               return features;
             },
           }),
+        },
+
+        // Set a feature to a value
+        SET: {
+          actions: (ctx, e) => {
+            const feature = ctx.features[e.name];
+            if (feature != null) {
+              feature.send({ type: 'SET', value: e.value });
+            }
+          },
         },
 
         // toggle a feature
