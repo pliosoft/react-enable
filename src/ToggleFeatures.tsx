@@ -185,7 +185,7 @@ function ShadowContent({ root, children }: { children: ReactNode; root: Element 
 /// a list of features to toggle and their current override state. you can override on or override off,
 /// or unset the override and go back to default value.
 // eslint-disable-next-line no-undef
-export function ToggleFeatures(): JSX.Element | null {
+export function ToggleFeatures({ defaultOpen = false }: { defaultOpen?: boolean }): JSX.Element | null {
   const [root, setCoreRoot] = useState<HTMLDivElement | null>(null);
 
   const setRoot = (host: HTMLDivElement | null) => {
@@ -205,7 +205,7 @@ export function ToggleFeatures(): JSX.Element | null {
     <div ref={setRoot} style={{ zIndex: 99999, position: 'fixed', width: '100%', height: '40px', bottom: 0 }}>
       {root != null ? (
         <ShadowContent root={root}>
-          <ToggleFeatureUnwrapped />
+          <ToggleFeatureUnwrapped defaultOpen={defaultOpen} />
         </ShadowContent>
       ) : null}
     </div>
@@ -214,8 +214,8 @@ export function ToggleFeatures(): JSX.Element | null {
 
 /// Like ToggleFeatures, but does not inject styles into a shadow DOM root node.
 /// useful if you're using tailwind.
-export function ToggleFeatureUnwrapped(): JSX.Element | null {
-  const [open, setOpen] = useState(false);
+export function ToggleFeatureUnwrapped({ defaultOpen = false }: { defaultOpen?: boolean }): JSX.Element | null {
+  const [open, setOpen] = useState(defaultOpen);
   const context = useContext(FeatureContext);
 
   if (context == null) {
