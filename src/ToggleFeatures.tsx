@@ -202,7 +202,7 @@ export function ToggleFeatures({ defaultOpen = false }: { defaultOpen?: boolean 
   };
 
   return (
-    <div ref={setRoot} style={{ zIndex: 99999, position: 'fixed', width: '100%', height: '40px', bottom: 0 }}>
+    <div ref={setRoot} style={{ zIndex: 99999, position: 'fixed', width: '100%', height: '0', bottom: 0 }}>
       {root != null ? (
         <ShadowContent root={root}>
           <ToggleFeatureUnwrapped defaultOpen={defaultOpen} />
