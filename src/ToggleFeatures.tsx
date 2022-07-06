@@ -103,7 +103,7 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
       </RadioGroup.Label>
       <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
         {[
-          { id: 'true', title: `Enable ${feature.name}`, description: 'Override the feature to be enabled' },
+          { id: 'false', title: `Disable ${feature.name}`, description: 'Override the feature to be disabled' },
           {
             id: 'unset',
             title: 'Default',
@@ -120,7 +120,7 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
                 </div>
               ),
           },
-          { id: 'false', title: `Disable ${feature.name}`, description: 'Override the feature to be disabled' },
+          { id: 'true', title: `Enable ${feature.name}`, description: 'Override the feature to be enabled' },
         ].map((option) => (
           <RadioGroup.Option
             className={({ checked, active, disabled }) =>
