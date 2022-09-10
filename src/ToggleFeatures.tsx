@@ -202,7 +202,7 @@ export function ToggleFeatures({ defaultOpen = false }: { defaultOpen?: boolean 
   };
 
   return (
-    <div ref={setRoot} style={{ zIndex: 99999, position: 'fixed', width: '100%', height: '0', bottom: 0 }}>
+    <div ref={setRoot} style={{ zIndex: 99999, position: 'fixed', width: '0', height: '0', bottom: 0 }}>
       {root != null ? (
         <ShadowContent root={root}>
           <ToggleFeatureUnwrapped defaultOpen={defaultOpen} />
@@ -231,7 +231,7 @@ export function ToggleFeatureUnwrapped({ defaultOpen = false }: { defaultOpen?: 
 
   return (
     <div className="relative">
-      <div className="absolute bottom-0 left-0 mx-8 my-8">
+      <div className="absolute bottom-0 left-0 mx-4 my-4">
         <button
           className="inline-flex items-center text-sm font-medium p-1 h-8 w-8 align-middle cursor-pointer rounded-full bg-blue-600 text-white  border border-transparent justify-center text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 sm:text-sm"
           onClick={() => setOpen(true)}
