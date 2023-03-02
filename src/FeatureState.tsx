@@ -95,7 +95,7 @@ export const FeatureMachine = createMachine<FeatureContext, FeatureAction, Featu
   id: 'feature',
   initial: 'initial',
   context: {},
-
+  predictableActionArguments: true,
   on: {
     ENABLE: [
       { target: 'asyncEnabled', cond: (ctx) => ctx.featureDesc?.onChangeDefault != null },
