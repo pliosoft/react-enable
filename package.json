@@ -53,6 +53,7 @@
     "eslint-plugin-import-helpers": "^1.2.1",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.4.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^26",
     "postcss": "^8.4.12",
     "postcss-import": "^14.1.0",
@@ -74,8 +75,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.5.0",
-    "@xstate/react": "^3.0.0",
+    "@xstate/react": "^3.2.1",
     "tslib": "^1.14.1",
-    "xstate": "^4.31.0"
+    "xstate": "^4.37.0"
   }
 }

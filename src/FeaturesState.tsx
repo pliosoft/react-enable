@@ -44,6 +44,7 @@ export function valueOfFeature(featuresState: FeaturesState, feature: string): [
 export const FeaturesMachine = createMachine<FeaturesContext, FeaturesAction, FeaturesTypeState>({
   id: 'features',
   initial: 'idle',
+  predictableActionArguments: true,
   context: {
     features: {},
   },
