@@ -20,7 +20,7 @@ Then most users will use it in the following manner:
 
 ```typescript
 import React, { lazy } from 'react';
-import { Features, ToggleFeature, Disable, Enable, FeatureDescription } from 'react-enable';
+import { Features, ToggleFeatures, Disable, Enable, FeatureDescription } from 'react-enable';
 
 const NewVersion = lazy(() => import('./src/new-version'));
 const OldVersion = lazy(() => import('./src/old-version'));
