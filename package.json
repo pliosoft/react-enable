@@ -1,6 +1,6 @@
 {
   "name": "react-enable",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "feature flags to enable and disable functionality at runtime in a react application",
   "main": "dist/cjs/src/index.js",
   "module": "dist/esm/src/index.js",
