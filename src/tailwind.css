@@ -744,6 +744,10 @@ select {
   display: grid;
 }
 
+.hidden {
+  display: none;
+}
+
 .h-7 {
   height: 1.75rem;
 }
