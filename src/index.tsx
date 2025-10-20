@@ -10,7 +10,6 @@ export type {
   FeatureValue,
 } from './FeatureState';
 export { Features } from './Features';
-export { FeaturesMachine } from './FeaturesState';
 export { ToggleFeatures } from './ToggleFeatures';
 export { useAllDisabled } from './useAllDisabled';
 export { useAllEnabled } from './useAllEnabled';

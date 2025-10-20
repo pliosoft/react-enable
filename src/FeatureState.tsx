@@ -1,10 +1,4 @@
-import {
-  type DoneInvokeEvent,
-  type InterpreterFrom,
-  type StateFrom,
-  assign,
-  createMachine,
-} from 'xstate';
+import type { Dispatch } from 'react';
 
 /**
  * Feature is either on, off, or 'unset',
@@ -12,20 +6,34 @@ import {
  */
 export type FeatureValue = false | true | undefined;
 
-export type FeatureState = StateFrom<typeof FeatureMachine>;
-export type FeatureDispatch = InterpreterFrom<typeof FeatureMachine>['send'];
+export type FeatureStateValue =
+  | 'initial'
+  | 'enabled'
+  | 'disabled'
+  | 'unspecified'
+  | 'asyncEnabled'
+  | 'asyncDisabled'
+  | 'asyncUnspecified';
+
+export interface FeatureState {
+  value: FeatureStateValue;
+  featureDesc?: FeatureDescription;
+}
+
+export type FeatureDispatch = Dispatch<FeatureAction>;
 
 /// Given a featurestate, determine the value (on, off, or unset)
 export function valueForState(
   featureState: FeatureState,
 ): [FeatureValue, boolean] {
   return [
-    featureState.matches('enabled')
+    featureState.value === 'enabled' || featureState.value === 'asyncEnabled'
       ? true
-      : featureState.matches('disabled')
+      : featureState.value === 'disabled' ||
+          featureState.value === 'asyncDisabled'
         ? false
         : undefined,
-    featureState.context.featureDesc?.force ?? false,
+    featureState.featureDesc?.force ?? false,
   ];
 }
 
@@ -58,40 +66,6 @@ export interface FeatureDescription<K extends string = string> {
   readonly defaultValue?: FeatureValue;
 }
 
-interface FeatureContext {
-  featureDesc?: FeatureDescription;
-}
-
-type FeatureTypeState =
-  | {
-      value: 'asyncDenabled';
-      context: FeatureContext;
-    }
-  | {
-      value: 'asyncDisabled';
-      context: FeatureContext;
-    }
-  | {
-      value: 'asyncUnspecied';
-      context: FeatureContext;
-    }
-  | {
-      value: 'disabled';
-      context: FeatureContext;
-    }
-  | {
-      value: 'enabled';
-      context: FeatureContext;
-    }
-  | {
-      value: 'initial';
-      context: never;
-    }
-  | {
-      value: 'unspecied';
-      context: FeatureContext;
-    };
-
 /**
  * Actions that can be performed on a feature.
  */
@@ -101,180 +75,95 @@ export type FeatureAction =
   | { type: 'INIT'; feature: FeatureDescription }
   | { type: 'SET'; value: FeatureValue }
   | { type: 'TOGGLE' }
-  | { type: 'UNSET' };
+  | { type: 'UNSET' }
+  | { type: 'ASYNC_DONE'; value: FeatureValue };
+
+export const initialFeatureState: FeatureState = {
+  value: 'initial',
+};
 
 /**
- * Fully describe the states a feature can be in
+ * Reducer for managing individual feature state
  */
-export const FeatureMachine = createMachine<
-  FeatureContext,
-  FeatureAction,
-  FeatureTypeState
->({
-  id: 'feature',
-  initial: 'initial',
-  context: {},
-  predictableActionArguments: true,
-  on: {
-    ENABLE: [
-      {
-        target: 'asyncEnabled',
-        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
-      },
-      { target: 'enabled' },
-    ],
+export function featureReducer(
+  state: FeatureState,
+  action: FeatureAction,
+): FeatureState {
+  switch (action.type) {
+    case 'INIT': {
+      const { feature } = action;
+      const value =
+        feature.defaultValue === true
+          ? 'enabled'
+          : feature.defaultValue === false
+            ? 'disabled'
+            : 'unspecified';
+      return {
+        value: value as FeatureStateValue,
+        featureDesc: feature,
+      };
+    }
 
-    TOGGLE: [
-      {
-        target: 'asyncEnabled',
-        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
-      },
-      { target: 'enabled' },
-    ],
+    case 'ENABLE': {
+      if (state.featureDesc?.onChangeDefault != null) {
+        return { ...state, value: 'asyncEnabled' };
+      }
+      return { ...state, value: 'enabled' };
+    }
 
-    DISABLE: [
-      {
-        target: 'asyncDisabled',
-        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
-      },
-      { target: 'disabled' },
-    ],
+    case 'DISABLE': {
+      if (state.featureDesc?.onChangeDefault != null) {
+        return { ...state, value: 'asyncDisabled' };
+      }
+      return { ...state, value: 'disabled' };
+    }
 
-    UNSET: [
-      {
-        target: 'asyncUnspecied',
-        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
-      },
-      { target: 'unspecified' },
-    ],
+    case 'TOGGLE': {
+      if (state.featureDesc?.onChangeDefault != null) {
+        return { ...state, value: 'asyncEnabled' };
+      }
+      return { ...state, value: 'enabled' };
+    }
 
-    SET: [
-      {
-        target: 'asyncEnabled',
-        cond: (ctx, e) =>
-          e.value === true && ctx.featureDesc?.onChangeDefault != null,
-      },
-      {
-        target: 'asyncDisabled',
-        cond: (ctx, e) =>
-          e.value === false && ctx.featureDesc?.onChangeDefault != null,
-      },
-      {
-        target: 'asyncUnspecied',
-        cond: (ctx, _e) => ctx.featureDesc?.onChangeDefault != null,
-      },
-      {
-        target: 'enabled',
-        cond: (_ctx, e) => e.value === true,
-      },
-      {
-        target: 'disabled',
-        cond: (_ctx, e) => e.value === false,
-      },
-      { target: 'unspecified' },
-    ],
-  },
+    case 'UNSET': {
+      if (state.featureDesc?.onChangeDefault != null) {
+        return { ...state, value: 'asyncUnspecified' };
+      }
+      return { ...state, value: 'unspecified' };
+    }
 
-  states: {
-    initial: {
-      on: {
-        INIT: [
-          {
-            actions: assign({ featureDesc: (_, e) => e.feature }),
-            target: 'enabled',
-            cond: (_, e) => e.feature.defaultValue === true,
-          },
-          {
-            actions: assign({ featureDesc: (_, e) => e.feature }),
-            target: 'unspecified',
-            cond: (_, e) => e.feature.defaultValue === undefined,
-          },
-          {
-            actions: assign({ featureDesc: (_, e) => e.feature }),
-            target: 'disabled',
-            cond: (_, e) => e.feature.defaultValue === false,
-          },
-        ],
-      },
-    },
+    case 'SET': {
+      const { value } = action;
+      if (state.featureDesc?.onChangeDefault != null) {
+        if (value === true) {
+          return { ...state, value: 'asyncEnabled' };
+        }
+        if (value === false) {
+          return { ...state, value: 'asyncDisabled' };
+        }
+        return { ...state, value: 'asyncUnspecified' };
+      }
+      if (value === true) {
+        return { ...state, value: 'enabled' };
+      }
+      if (value === false) {
+        return { ...state, value: 'disabled' };
+      }
+      return { ...state, value: 'unspecified' };
+    }
 
-    unspecified: {},
-    disabled: {},
-    enabled: {},
+    case 'ASYNC_DONE': {
+      const { value } = action;
+      if (value === true) {
+        return { ...state, value: 'enabled' };
+      }
+      if (value === false) {
+        return { ...state, value: 'disabled' };
+      }
+      return { ...state, value: 'unspecified' };
+    }
 
-    asyncDisabled: {
-      invoke: {
-        id: 'set-off-upstream',
-        src: async (ctx) => {
-          const onchange = ctx.featureDesc?.onChangeDefault;
-          if (onchange != null && ctx.featureDesc != null) {
-            return onchange(ctx.featureDesc.name, false);
-          }
-          return undefined;
-        },
-        onDone: [
-          {
-            target: 'enabled',
-            cond: (_ctx, e: DoneInvokeEvent<FeatureValue>) => e.data === true,
-          },
-          {
-            target: 'disabled',
-            cond: (_ctx, e: DoneInvokeEvent<FeatureValue>) => e.data === false,
-          },
-          { target: 'unspecified' },
-        ],
-        onError: 'unspecified',
-      },
-    },
-
-    asyncUnspecied: {
-      invoke: {
-        id: 'set-unset-upstream',
-        src: async (ctx) => {
-          const onchange = ctx.featureDesc?.onChangeDefault;
-          if (onchange != null && ctx.featureDesc != null) {
-            return onchange(ctx.featureDesc.name, undefined);
-          }
-          return undefined;
-        },
-        onDone: [
-          {
-            target: 'enabled',
-            cond: (_ctx, e: DoneInvokeEvent<FeatureValue>) => e.data === true,
-          },
-          {
-            target: 'disabled',
-            cond: (_ctx, e: DoneInvokeEvent<FeatureValue>) => e.data === false,
-          },
-          { target: 'unspecified' },
-        ],
-        onError: 'unspecified',
-      },
-    },
-
-    asyncEnabled: {
-      invoke: {
-        id: 'set-on-upstream',
-        src: async (ctx) => {
-          const onchange = ctx.featureDesc?.onChangeDefault;
-          if (onchange != null && ctx.featureDesc != null) {
-            return onchange(ctx.featureDesc.name, true);
-          }
-          return undefined;
-        },
-        onDone: [
-          {
-            target: 'enabled',
-            cond: (_ctx, e: DoneInvokeEvent<FeatureValue>) => e.data === true,
-          },
-          {
-            target: 'disabled',
-            cond: (_ctx, e: DoneInvokeEvent<FeatureValue>) => e.data === false,
-          },
-          { target: 'unspecified' },
-        ],
-        onError: 'unspecified',
-      },
-    },
-  },
-});
+    default:
+      return state;
+  }
+}

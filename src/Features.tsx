@@ -1,10 +1,15 @@
-import { useMachine } from '@xstate/react';
-import React, { type ReactNode, useEffect, useMemo, useRef } from 'react';
+import React, {
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from 'react';
 
 import { EnableContext } from './EnableContext';
 import { FeatureContext } from './FeatureContext';
 import type { FeatureDescription } from './FeatureState';
-import { FeaturesMachine } from './FeaturesState';
+import { featuresReducer, initialFeaturesState } from './FeaturesState';
 import useConsoleOverride from './useConsoleOverride';
 import usePersist, { KEY } from './usePersist';
 import useTestCallback from './useTestCallback';
@@ -30,16 +35,22 @@ export function Features({
 }: FeatureProps): JSX.Element {
   // Capture only first value; we don't care about future updates
   const featuresRef = useRef(features);
-  const [overridesState, overridesSend] = useMachine(FeaturesMachine);
-  const [defaultsState, defaultsSend] = useMachine(FeaturesMachine);
+  const [overridesState, overridesDispatch] = useReducer(
+    featuresReducer,
+    initialFeaturesState,
+  );
+  const [defaultsState, defaultsDispatch] = useReducer(
+    featuresReducer,
+    initialFeaturesState,
+  );
 
   useEffect(() => {
     /// Load defaults
-    defaultsSend({ type: 'INIT', features });
+    defaultsDispatch({ type: 'INIT', features });
     return () => {
-      defaultsSend({ type: 'DE_INIT' });
+      defaultsDispatch({ type: 'DE_INIT' });
     };
-  }, [defaultsSend, features]);
+  }, [features]);
 
   useEffect(() => {
     let f: Record<string, boolean | undefined> = {};
@@ -56,7 +67,7 @@ export function Features({
       }
     }
 
-    overridesSend({
+    overridesDispatch({
       type: 'INIT',
       features: featuresRef.current
         .filter((x) => x.noOverride !== true)
@@ -68,9 +79,49 @@ export function Features({
     });
 
     return () => {
-      overridesSend({ type: 'DE_INIT' });
+      overridesDispatch({ type: 'DE_INIT' });
     };
-  }, [overridesSend, storage]);
+  }, [storage]);
+
+  // Handle async operations for features with onChangeDefault
+  useEffect(() => {
+    if (defaultsState.value !== 'ready') {
+      return;
+    }
+
+    // Check for features in async states and handle them
+    Object.entries(defaultsState.context.features).forEach(
+      ([name, feature]) => {
+        if (
+          feature.value === 'asyncEnabled' ||
+          feature.value === 'asyncDisabled' ||
+          feature.value === 'asyncUnspecified'
+        ) {
+          const targetValue =
+            feature.value === 'asyncEnabled'
+              ? true
+              : feature.value === 'asyncDisabled'
+                ? false
+                : undefined;
+
+          const onChangeDefault = feature.featureDesc?.onChangeDefault;
+          if (onChangeDefault != null && feature.featureDesc != null) {
+            onChangeDefault(feature.featureDesc.name, targetValue)
+              .then((result) => {
+                defaultsDispatch({ type: 'ASYNC_DONE', name, value: result });
+              })
+              .catch(() => {
+                defaultsDispatch({
+                  type: 'ASYNC_DONE',
+                  name,
+                  value: undefined,
+                });
+              });
+          }
+        }
+      },
+    );
+  }, [defaultsState]);
 
   usePersist(storage, featuresRef.current, overridesState);
 
@@ -79,19 +130,19 @@ export function Features({
     !disableConsole,
     featuresRef.current,
     testCallback,
-    defaultsSend,
+    defaultsDispatch,
   );
 
   const featureValue = useMemo(
     () => ({
-      overridesSend,
-      defaultsSend,
+      overridesSend: overridesDispatch,
+      defaultsSend: defaultsDispatch,
       featuresDescription: featuresRef.current,
       overridesState,
       defaultsState,
       test: testCallback,
     }),
-    [overridesSend, defaultsSend, overridesState, defaultsState, testCallback],
+    [overridesState, defaultsState, testCallback],
   );
 
   return (

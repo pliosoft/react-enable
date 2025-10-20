@@ -1,15 +1,8 @@
-import {
-  type ActorRefFrom,
-  type InterpreterFrom,
-  type StateFrom,
-  assign,
-  createMachine,
-  spawn,
-} from 'xstate';
+import type { Dispatch } from 'react';
 
 import {
   type FeatureDescription,
-  FeatureMachine,
+  type FeatureState,
   type FeatureValue,
   valueForState,
 } from './FeatureState';
@@ -20,7 +13,7 @@ export interface FeaturesContext {
   //  - browser: browser-local values for features (kept in local storage, etc)
   //  - user: values from the user's profile, if any
   //  - org: value from the org's profile, if any
-  features: { [x: string]: ActorRefFrom<typeof FeatureMachine> };
+  features: { [x: string]: FeatureState };
 }
 
 export type FeaturesAction =
@@ -31,15 +24,15 @@ export type FeaturesAction =
   | { type: 'SET_ALL'; features: { [key: string]: FeatureValue } }
   | { type: 'SET'; name: string; value: FeatureValue }
   | { type: 'TOGGLE'; name: string }
-  | { type: 'UNSET'; name: string };
+  | { type: 'UNSET'; name: string }
+  | { type: 'ASYNC_DONE'; name: string; value: FeatureValue };
 
-export interface FeaturesTypeState {
-  value: 'ready';
+export interface FeaturesState {
+  value: 'idle' | 'ready';
   context: FeaturesContext;
 }
 
-export type FeaturesState = StateFrom<typeof FeaturesMachine>;
-export type FeaturesDispatch = InterpreterFrom<typeof FeaturesMachine>['send'];
+export type FeaturesDispatch = Dispatch<FeaturesAction>;
 
 export function valueOfFeature(
   featuresState: FeaturesState,
@@ -48,122 +41,269 @@ export function valueOfFeature(
   if (featuresState.context.features[feature] == null) {
     return [undefined, false];
   }
-  const featureState = featuresState.context.features[feature].getSnapshot();
+  const featureState = featuresState.context.features[feature];
   if (featureState != null) {
     return valueForState(featureState);
   }
   return [undefined, false];
 }
 
-/// state machine that manages a set of features with user, org, and local overrides
-export const FeaturesMachine = createMachine<
-  FeaturesContext,
-  FeaturesAction,
-  FeaturesTypeState
->({
-  id: 'features',
-  initial: 'idle',
-  predictableActionArguments: true,
+export const initialFeaturesState: FeaturesState = {
+  value: 'idle',
   context: {
     features: {},
   },
-  states: {
-    idle: {
-      on: {
-        INIT: {
-          target: 'ready',
-          cond: (_, e) => e.features.length > 0,
-          actions: assign({
-            features: (context, event) => {
-              const features: typeof context.features = {};
+};
 
-              for (const feature of event.features) {
-                features[feature.name] = spawn(FeatureMachine, {
-                  name: feature.name,
-                  sync: true,
-                });
-                features[feature.name].send({ type: 'INIT', feature });
-              }
-              return features;
-            },
-          }),
-        },
-      },
-    },
+/**
+ * Reducer for managing a collection of features
+ */
+export function featuresReducer(
+  state: FeaturesState,
+  action: FeaturesAction,
+): FeaturesState {
+  switch (action.type) {
+    case 'INIT': {
+      if (action.features.length === 0) {
+        return state;
+      }
 
-    // the features are loaded and ready to be used
-    ready: {
-      on: {
-        DE_INIT: {
-          target: 'idle',
-          actions: assign({ features: (_, __) => ({}) }),
-        },
-        SET_ALL: {
-          actions: assign({
-            features: (ctx, e) => {
-              const features = { ...ctx.features };
-              // All configured features are set to on/off or undefined
-              Object.keys(features).forEach((name) => {
-                features[name].send({
-                  type: 'SET',
-                  value: e.features[name] ?? undefined,
-                });
-              });
-              return features;
-            },
-          }),
-        },
+      const features: { [x: string]: FeatureState } = {};
+      for (const feature of action.features) {
+        // Initialize each feature
+        const featureState = {
+          value:
+            feature.defaultValue === true
+              ? ('enabled' as const)
+              : feature.defaultValue === false
+                ? ('disabled' as const)
+                : ('unspecified' as const),
+          featureDesc: feature,
+        };
+        features[feature.name] = featureState;
+      }
 
-        // Set a feature to a value
-        SET: {
-          actions: (ctx, e) => {
-            const feature = ctx.features[e.name];
-            if (feature != null) {
-              feature.send({ type: 'SET', value: e.value });
-            }
+      return {
+        value: 'ready',
+        context: { features },
+      };
+    }
+
+    case 'DE_INIT': {
+      return initialFeaturesState;
+    }
+
+    case 'SET_ALL': {
+      if (state.value !== 'ready') {
+        return state;
+      }
+
+      const features = { ...state.context.features };
+      Object.keys(features).forEach((name) => {
+        const value = action.features[name] ?? undefined;
+        const currentFeature = features[name];
+
+        if (currentFeature.featureDesc?.onChangeDefault != null) {
+          if (value === true) {
+            features[name] = { ...currentFeature, value: 'asyncEnabled' };
+          } else if (value === false) {
+            features[name] = { ...currentFeature, value: 'asyncDisabled' };
+          } else {
+            features[name] = { ...currentFeature, value: 'asyncUnspecified' };
+          }
+        } else {
+          if (value === true) {
+            features[name] = { ...currentFeature, value: 'enabled' };
+          } else if (value === false) {
+            features[name] = { ...currentFeature, value: 'disabled' };
+          } else {
+            features[name] = { ...currentFeature, value: 'unspecified' };
+          }
+        }
+      });
+
+      return {
+        ...state,
+        context: { features },
+      };
+    }
+
+    case 'SET': {
+      if (state.value !== 'ready') {
+        return state;
+      }
+
+      const feature = state.context.features[action.name];
+      if (feature == null) {
+        return state;
+      }
+
+      const { value } = action;
+      let newValue: FeatureState['value'];
+
+      if (feature.featureDesc?.onChangeDefault != null) {
+        if (value === true) {
+          newValue = 'asyncEnabled';
+        } else if (value === false) {
+          newValue = 'asyncDisabled';
+        } else {
+          newValue = 'asyncUnspecified';
+        }
+      } else {
+        if (value === true) {
+          newValue = 'enabled';
+        } else if (value === false) {
+          newValue = 'disabled';
+        } else {
+          newValue = 'unspecified';
+        }
+      }
+
+      return {
+        ...state,
+        context: {
+          features: {
+            ...state.context.features,
+            [action.name]: { ...feature, value: newValue },
           },
         },
+      };
+    }
 
-        // toggle a feature
-        TOGGLE: {
-          actions: (ctx, e) => {
-            const feature = ctx.features[e.name];
-            if (feature != null) {
-              feature.send({ type: 'TOGGLE' });
-            }
+    case 'TOGGLE': {
+      if (state.value !== 'ready') {
+        return state;
+      }
+
+      const feature = state.context.features[action.name];
+      if (feature == null) {
+        return state;
+      }
+
+      const newValue =
+        feature.featureDesc?.onChangeDefault != null
+          ? 'asyncEnabled'
+          : 'enabled';
+
+      return {
+        ...state,
+        context: {
+          features: {
+            ...state.context.features,
+            [action.name]: { ...feature, value: newValue },
           },
         },
+      };
+    }
 
-        // when a feature is enabled, send the enable message to the actor
-        ENABLE: {
-          actions: (ctx, e) => {
-            const feature = ctx.features[e.name];
-            if (feature != null) {
-              feature.send({ type: 'ENABLE' });
-            }
+    case 'ENABLE': {
+      if (state.value !== 'ready') {
+        return state;
+      }
+
+      const feature = state.context.features[action.name];
+      if (feature == null) {
+        return state;
+      }
+
+      const newValue =
+        feature.featureDesc?.onChangeDefault != null
+          ? 'asyncEnabled'
+          : 'enabled';
+
+      return {
+        ...state,
+        context: {
+          features: {
+            ...state.context.features,
+            [action.name]: { ...feature, value: newValue },
           },
         },
+      };
+    }
 
-        // when a feature is disabled, send the disable message to the actor
-        DISABLE: {
-          actions: (ctx, e) => {
-            const feature = ctx.features[e.name];
-            if (feature != null) {
-              feature.send({ type: 'DISABLE' });
-            }
+    case 'DISABLE': {
+      if (state.value !== 'ready') {
+        return state;
+      }
+
+      const feature = state.context.features[action.name];
+      if (feature == null) {
+        return state;
+      }
+
+      const newValue =
+        feature.featureDesc?.onChangeDefault != null
+          ? 'asyncDisabled'
+          : 'disabled';
+
+      return {
+        ...state,
+        context: {
+          features: {
+            ...state.context.features,
+            [action.name]: { ...feature, value: newValue },
           },
         },
+      };
+    }
 
-        // when a feature is unset, send the unset message to the actor
-        UNSET: {
-          actions: (ctx, e) => {
-            const feature = ctx.features[e.name];
-            if (feature != null) {
-              feature.send({ type: 'UNSET' });
-            }
+    case 'UNSET': {
+      if (state.value !== 'ready') {
+        return state;
+      }
+
+      const feature = state.context.features[action.name];
+      if (feature == null) {
+        return state;
+      }
+
+      const newValue =
+        feature.featureDesc?.onChangeDefault != null
+          ? 'asyncUnspecified'
+          : 'unspecified';
+
+      return {
+        ...state,
+        context: {
+          features: {
+            ...state.context.features,
+            [action.name]: { ...feature, value: newValue },
           },
         },
-      },
-    },
-  },
-});
+      };
+    }
+
+    case 'ASYNC_DONE': {
+      if (state.value !== 'ready') {
+        return state;
+      }
+
+      const feature = state.context.features[action.name];
+      if (feature == null) {
+        return state;
+      }
+
+      const { value } = action;
+      const newValue =
+        value === true
+          ? 'enabled'
+          : value === false
+            ? 'disabled'
+            : 'unspecified';
+
+      return {
+        ...state,
+        context: {
+          features: {
+            ...state.context.features,
+            [action.name]: { ...feature, value: newValue },
+          },
+        },
+      };
+    }
+
+    default:
+      return state;
+  }
+}

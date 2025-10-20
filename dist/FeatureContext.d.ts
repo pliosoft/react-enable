@@ -1,6 +1,6 @@
 /// <reference types="react" />
-import { FeaturesDispatch, FeaturesState } from './FeaturesState';
-import { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeaturesDispatch, FeaturesState } from './FeaturesState';
 export declare const FeatureContext: import("react").Context<FeatureContextType | null>;
 export interface FeatureContextType {
     overridesSend: FeaturesDispatch;

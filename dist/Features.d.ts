@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { FeatureDescription } from './FeatureState';
+import { type ReactNode } from 'react';
+import type { FeatureDescription } from './FeatureState';
 interface FeatureProps {
     readonly features: readonly FeatureDescription[];
     readonly children?: ReactNode;

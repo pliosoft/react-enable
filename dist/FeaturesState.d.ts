@@ -1,8 +1,8 @@
-import { ActorRefFrom, InterpreterFrom, StateFrom } from 'xstate';
-import { FeatureMachine, FeatureDescription, FeatureValue } from './FeatureState';
+import type { Dispatch } from 'react';
+import { type FeatureDescription, type FeatureState, type FeatureValue } from './FeatureState';
 export interface FeaturesContext {
     features: {
-        [x: string]: ActorRefFrom<typeof FeatureMachine>;
+        [x: string]: FeatureState;
     };
 }
 export declare type FeaturesAction = {
@@ -31,12 +31,16 @@ export declare type FeaturesAction = {
 } | {
     type: 'UNSET';
     name: string;
+} | {
+    type: 'ASYNC_DONE';
+    name: string;
+    value: FeatureValue;
 };
-export interface FeaturesTypeState {
-    value: 'ready';
+export interface FeaturesState {
+    value: 'idle' | 'ready';
     context: FeaturesContext;
 }
-export declare type FeaturesState = StateFrom<typeof FeaturesMachine>;
-export declare type FeaturesDispatch = InterpreterFrom<typeof FeaturesMachine>['send'];
+export declare type FeaturesDispatch = Dispatch<FeaturesAction>;
 export declare function valueOfFeature(featuresState: FeaturesState, feature: string): [FeatureValue, boolean];
-export declare const FeaturesMachine: import("xstate").StateMachine<FeaturesContext, any, FeaturesAction, FeaturesTypeState, import("xstate").BaseActionObject, import("xstate").ServiceMap, import("xstate").ResolveTypegenMeta<import("xstate").TypegenDisabled, FeaturesAction, import("xstate").BaseActionObject, import("xstate").ServiceMap>>;
+export declare const initialFeaturesState: FeaturesState;
+export declare function featuresReducer(state: FeaturesState, action: FeaturesAction): FeaturesState;

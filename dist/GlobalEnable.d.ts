@@ -1,5 +1,5 @@
-import { FeaturesDispatch } from './FeaturesState';
-import { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeaturesDispatch } from './FeaturesState';
 export declare class GlobalEnable {
     private readonly featureDesc;
     private readonly dispatch;

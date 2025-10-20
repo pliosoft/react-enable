@@ -11,7 +11,7 @@ export default function usePersist(
 ): void {
   const overrides = useMemo(() => {
     const newOverrides: { [key: string]: FeatureValue } = {};
-    if (overrideState.matches('ready')) {
+    if (overrideState.value === 'ready') {
       for (const feature of features) {
         const [value] = valueOfFeature(overrideState, feature.name);
         if (value != null) {
@@ -29,7 +29,7 @@ export default function usePersist(
 
   useEffect(() => {
     try {
-      if (storage != null && overrideState.matches('ready')) {
+      if (storage != null && overrideState.value === 'ready') {
         storage.setItem(KEY, strState);
       }
     } catch (e) {

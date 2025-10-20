@@ -1,15 +1,15 @@
-import { interpret } from 'xstate';
-
-import { FeaturesMachine, type FeaturesState } from './FeaturesState';
+import {
+  type FeaturesState,
+  featuresReducer,
+  initialFeaturesState,
+} from './FeaturesState';
 import testFeature from './testFeature';
 
 // Helper function to create a features state with specific feature values
 function createFeaturesState(
   features: Array<{ name: string; defaultValue?: boolean; force?: boolean }>,
 ): FeaturesState {
-  const service = interpret(FeaturesMachine);
-  service.start();
-  service.send({
+  return featuresReducer(initialFeaturesState, {
     type: 'INIT',
     features: features.map((f) => ({
       name: f.name,
@@ -18,7 +18,6 @@ function createFeaturesState(
       force: f.force ?? false,
     })),
   });
-  return service.getSnapshot();
 }
 
 // Helper to set feature values in a state
@@ -27,9 +26,7 @@ function setFeatureValue(
   name: string,
   value: boolean | undefined,
 ): FeaturesState {
-  const service = interpret(FeaturesMachine).start(state);
-  service.send({ type: 'SET', name, value });
-  return service.getSnapshot();
+  return featuresReducer(state, { type: 'SET', name, value });
 }
 
 describe('testFeature', () => {
@@ -144,9 +141,7 @@ describe('testFeature', () => {
   describe('forced values', () => {
     it('should prioritize forced value over non-forced value', () => {
       // Create state with force=true and value=true
-      const service1 = interpret(FeaturesMachine);
-      service1.start();
-      service1.send({
+      let state1 = featuresReducer(initialFeaturesState, {
         type: 'INIT',
         features: [
           {
@@ -157,7 +152,6 @@ describe('testFeature', () => {
           },
         ],
       });
-      let state1 = service1.getSnapshot();
       state1 = setFeatureValue(state1, 'Feature1', true);
 
       // Create state with force=false and value=false
@@ -173,9 +167,7 @@ describe('testFeature', () => {
 
     it('should use first forced value when multiple forced values exist', () => {
       // Create first state with force=true and value=true
-      const service1 = interpret(FeaturesMachine);
-      service1.start();
-      service1.send({
+      let state1 = featuresReducer(initialFeaturesState, {
         type: 'INIT',
         features: [
           {
@@ -186,13 +178,10 @@ describe('testFeature', () => {
           },
         ],
       });
-      let state1 = service1.getSnapshot();
       state1 = setFeatureValue(state1, 'Feature1', true);
 
       // Create second state with force=true and value=false
-      const service2 = interpret(FeaturesMachine);
-      service2.start();
-      service2.send({
+      let state2 = featuresReducer(initialFeaturesState, {
         type: 'INIT',
         features: [
           {
@@ -203,7 +192,6 @@ describe('testFeature', () => {
           },
         ],
       });
-      let state2 = service2.getSnapshot();
       state2 = setFeatureValue(state2, 'Feature1', false);
 
       // First forced value should win
