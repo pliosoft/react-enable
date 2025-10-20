@@ -197,7 +197,9 @@ describe('ToggleFeatureUnwrapped', () => {
       );
 
       // There should be one of each description per feature (3 features)
-      expect(getAllByText('Override the feature to be enabled')).toHaveLength(3);
+      expect(getAllByText('Override the feature to be enabled')).toHaveLength(
+        3,
+      );
       expect(getAllByText('Override the feature to be disabled')).toHaveLength(
         3,
       );

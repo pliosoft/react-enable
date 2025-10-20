@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useImportType: JSX requires React at runtime
 import * as React from 'react';
 
 import type { EnableProps } from './Enable';
