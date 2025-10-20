@@ -1,9 +1,7 @@
-import * as React from 'react';
-
 import { fireEvent, render, screen } from '@testing-library/react';
-
+import * as React from 'react';
+import type { FeatureDescription } from './FeatureState';
 import { Features } from './Features';
-import { FeatureDescription } from './FeatureState';
 import { ToggleFeatureUnwrapped } from './ToggleFeatures';
 
 const mockFeatures: FeatureDescription[] = [
@@ -36,7 +34,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { container } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped hidden={true} />
-        </Features>
+        </Features>,
       );
       expect(container.querySelector('button')).toBeNull();
     });
@@ -45,7 +43,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByTitle } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       expect(getByTitle('Toggle features')).toBeInTheDocument();
@@ -55,7 +53,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { container } = render(
         <Features features={[]}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
       expect(container.firstChild).toBeNull();
     });
@@ -64,7 +62,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { queryByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       expect(queryByText('Feature Flag Overrides')).not.toBeInTheDocument();
@@ -74,7 +72,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('Feature Flag Overrides')).toBeInTheDocument();
@@ -86,7 +84,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText, getByTitle } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       const button = getByTitle('Toggle features');
@@ -99,7 +97,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText, queryByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('Feature Flag Overrides')).toBeInTheDocument();
@@ -114,7 +112,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('Feature1')).toBeInTheDocument();
@@ -126,12 +124,14 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('First test feature')).toBeInTheDocument();
       expect(getByText('Second test feature')).toBeInTheDocument();
-      expect(getByText('Third test feature with no override')).toBeInTheDocument();
+      expect(
+        getByText('Third test feature with no override'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -140,7 +140,7 @@ describe('ToggleFeatureUnwrapped', () => {
       render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       const enabledBadges = screen.getAllByText('Enabled');
@@ -151,7 +151,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('No Overrides')).toBeInTheDocument();
@@ -161,11 +161,13 @@ describe('ToggleFeatureUnwrapped', () => {
       const { container } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       const codeElements = container.querySelectorAll('code');
-      const featureNames = Array.from(codeElements).map((el) => el.textContent ?? '');
+      const featureNames = Array.from(codeElements).map(
+        (el) => el.textContent ?? '',
+      );
 
       expect(featureNames).toContain('Feature1');
       expect(featureNames).toContain('Feature2');
@@ -178,7 +180,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('Enable Feature1')).toBeInTheDocument();
@@ -190,12 +192,18 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
-      expect(getByText('Override the feature to be enabled')).toBeInTheDocument();
-      expect(getByText('Override the feature to be disabled')).toBeInTheDocument();
-      expect(getByText('Inherit enabled state from defaults')).toBeInTheDocument();
+      expect(
+        getByText('Override the feature to be enabled'),
+      ).toBeInTheDocument();
+      expect(
+        getByText('Override the feature to be disabled'),
+      ).toBeInTheDocument();
+      expect(
+        getByText('Inherit enabled state from defaults'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -211,7 +219,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={featuresNoDesc}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('NoDescFeature')).toBeInTheDocument();
@@ -235,14 +243,14 @@ describe('ToggleFeatureUnwrapped', () => {
       const { container } = render(
         <Features features={forcedFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       // The Default option should be disabled for forced features
       // We can check this by looking for disabled radio options
       const radioOptions = container.querySelectorAll('[role="radio"]');
       const defaultOption = Array.from(radioOptions).find((option) =>
-        (option.textContent ?? '').includes('Default')
+        (option.textContent ?? '').includes('Default'),
       );
 
       expect(defaultOption).toHaveAttribute('aria-disabled', 'true');
@@ -254,7 +262,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       // Check for fieldset legend
@@ -265,7 +273,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByTitle } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       const button = getByTitle('Toggle features');
@@ -276,7 +284,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       const doneButton = getByText('Done');
@@ -289,7 +297,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { container } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       const modal = container.querySelector('.fixed.z-10');
@@ -300,7 +308,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByTitle } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       const button = getByTitle('Toggle features');
@@ -311,7 +319,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
-        </Features>
+        </Features>,
       );
 
       const doneButton = getByText('Done');
@@ -324,7 +332,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText, getByTitle, rerender } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       const button = getByTitle('Toggle features');
@@ -335,7 +343,7 @@ describe('ToggleFeatureUnwrapped', () => {
       rerender(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       expect(getByText('Feature Flag Overrides')).toBeInTheDocument();
@@ -345,7 +353,7 @@ describe('ToggleFeatureUnwrapped', () => {
       const { getByText, getByTitle, queryByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
-        </Features>
+        </Features>,
       );
 
       const toggleButton = getByTitle('Toggle features');

@@ -1,10 +1,9 @@
+import { act, renderHook } from '@testing-library/react-hooks';
 import * as React from 'react';
 
-import { renderHook, act } from '@testing-library/react-hooks';
-
 import { FeatureContext } from './FeatureContext';
+import type { FeatureDescription } from './FeatureState';
 import { Features } from './Features';
-import { FeatureDescription } from './FeatureState';
 import { useAllEnabled, useDisabled, useEnabled } from './index';
 
 class LocalStorageMock {
@@ -51,7 +50,7 @@ describe('Integration Tests - Public API', () => {
           anyEnabled: useEnabled(['Feature1', 'Feature2']),
           anyDisabled: useDisabled(['Feature1', 'Feature2']),
         }),
-        { wrapper: Features, initialProps: { features: baseFeatures } }
+        { wrapper: Features, initialProps: { features: baseFeatures } },
       );
 
       expect(result.current.anyEnabled).toBe(true); // Feature2 is enabled
@@ -65,7 +64,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } }
+        { wrapper: Features, initialProps: { features: baseFeatures } },
       );
 
       expect(result.current.enabled).toBe(false);
@@ -84,7 +83,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } }
+        { wrapper: Features, initialProps: { features: baseFeatures } },
       );
 
       expect(result.current.enabled).toBe(false);
@@ -103,10 +102,13 @@ describe('Integration Tests - Public API', () => {
 
   describe('useAllEnabled and useAllDisabled', () => {
     it('should return true only when all features are enabled', () => {
-      const { result } = renderHook(() => useAllEnabled(['Feature1', 'Feature2']), {
-        wrapper: Features,
-        initialProps: { features: baseFeatures },
-      });
+      const { result } = renderHook(
+        () => useAllEnabled(['Feature1', 'Feature2']),
+        {
+          wrapper: Features,
+          initialProps: { features: baseFeatures },
+        },
+      );
 
       expect(result.current).toBe(false); // Feature1 is disabled
     });
@@ -127,7 +129,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { allEnabled, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } }
+        { wrapper: Features, initialProps: { features: baseFeatures } },
       );
 
       expect(result.current.allEnabled).toBe(false);
@@ -143,8 +145,18 @@ describe('Integration Tests - Public API', () => {
   describe('force flag behavior', () => {
     it('should respect force flag and ignore overrides', () => {
       const forcedFeatures: FeatureDescription[] = [
-        { name: 'ForcedOn', description: 'Forced on', defaultValue: true, force: true },
-        { name: 'ForcedOff', description: 'Forced off', defaultValue: false, force: true },
+        {
+          name: 'ForcedOn',
+          description: 'Forced on',
+          defaultValue: true,
+          force: true,
+        },
+        {
+          name: 'ForcedOff',
+          description: 'Forced off',
+          defaultValue: false,
+          force: true,
+        },
       ];
 
       const { result } = renderHook(
@@ -154,7 +166,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { forcedOn, forcedOff, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: forcedFeatures } }
+        { wrapper: Features, initialProps: { features: forcedFeatures } },
       );
 
       expect(result.current.forcedOn).toBe(true);
@@ -174,7 +186,12 @@ describe('Integration Tests - Public API', () => {
   describe('noOverride flag behavior', () => {
     it('should allow reading but prevent user overrides', () => {
       const noOverrideFeatures: FeatureDescription[] = [
-        { name: 'NoOverride', description: 'Cannot override', defaultValue: true, noOverride: true },
+        {
+          name: 'NoOverride',
+          description: 'Cannot override',
+          defaultValue: true,
+          noOverride: true,
+        },
       ];
 
       const { result } = renderHook(
@@ -183,7 +200,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: noOverrideFeatures } }
+        { wrapper: Features, initialProps: { features: noOverrideFeatures } },
       );
 
       expect(result.current.enabled).toBe(true);
@@ -209,7 +226,10 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures, storage } }
+        {
+          wrapper: Features,
+          initialProps: { features: baseFeatures, storage },
+        },
       );
 
       expect(firstResult.current.enabled).toBe(false);
@@ -222,10 +242,13 @@ describe('Integration Tests - Public API', () => {
       unmount();
 
       // Create new instance with same storage
-      const { result: secondResult } = renderHook(() => useEnabled('Feature1'), {
-        wrapper: Features,
-        initialProps: { features: baseFeatures, storage },
-      });
+      const { result: secondResult } = renderHook(
+        () => useEnabled('Feature1'),
+        {
+          wrapper: Features,
+          initialProps: { features: baseFeatures, storage },
+        },
+      );
 
       expect(secondResult.current).toBe(true);
     });
@@ -239,7 +262,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { f1, f2, f3, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } }
+        { wrapper: Features, initialProps: { features: baseFeatures } },
       );
 
       expect(result.current.f1).toBe(false);
@@ -265,7 +288,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } }
+        { wrapper: Features, initialProps: { features: baseFeatures } },
       );
 
       expect(result.current.enabled).toBe(false);
@@ -300,7 +323,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.defaultsSend };
         },
-        { wrapper: Features, initialProps: { features: asyncFeatures } }
+        { wrapper: Features, initialProps: { features: asyncFeatures } },
       );
 
       expect(result.current.enabled).toBe(false);
@@ -316,7 +339,9 @@ describe('Integration Tests - Public API', () => {
     });
 
     it('should handle async feature changes that reject', async () => {
-      const onChangeMock = jest.fn().mockRejectedValue(new Error('Backend error'));
+      const onChangeMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Backend error'));
       const asyncFeatures: FeatureDescription[] = [
         {
           name: 'AsyncFeature',
@@ -332,7 +357,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.defaultsSend };
         },
-        { wrapper: Features, initialProps: { features: asyncFeatures } }
+        { wrapper: Features, initialProps: { features: asyncFeatures } },
       );
 
       expect(result.current.enabled).toBe(false);
@@ -365,7 +390,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.defaultsSend };
         },
-        { wrapper: Features, initialProps: { features: asyncFeatures } }
+        { wrapper: Features, initialProps: { features: asyncFeatures } },
       );
 
       expect(result.current.enabled).toBe(false);
@@ -467,7 +492,11 @@ describe('Integration Tests - Public API', () => {
 
       const features = window.feature?.listFeatures();
       expect(features).toHaveLength(3);
-      expect(features?.map((f) => f[0])).toEqual(['Feature1', 'Feature2', 'Feature3']);
+      expect(features?.map((f) => f[0])).toEqual([
+        'Feature1',
+        'Feature2',
+        'Feature3',
+      ]);
     });
   });
 
@@ -497,7 +526,7 @@ describe('Integration Tests - Public API', () => {
           const context = React.useContext(FeatureContext);
           return { enabled, dispatch: context?.overridesSend };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } }
+        { wrapper: Features, initialProps: { features: baseFeatures } },
       );
 
       act(() => {

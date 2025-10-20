@@ -1,14 +1,13 @@
 import { useEffect } from 'react';
-
-import { FeaturesDispatch } from './FeaturesState';
-import { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeaturesDispatch } from './FeaturesState';
 import { GlobalEnable } from './GlobalEnable';
 
 export default function useConsoleOverride(
   consoleOverride: boolean,
   features: readonly FeatureDescription[],
   testFeature: (_: string) => FeatureValue,
-  dispatch: FeaturesDispatch
+  dispatch: FeaturesDispatch,
 ): void {
   useEffect(() => {
     if (!consoleOverride) {

@@ -1,5 +1,5 @@
-import { FeaturesState, valueOfFeature } from './FeaturesState';
-import { FeatureValue } from './FeatureState';
+import type { FeatureValue } from './FeatureState';
+import { type FeaturesState, valueOfFeature } from './FeaturesState';
 
 /** Determine if the feature is enabled in one of the state machines, in order
  *
@@ -7,7 +7,10 @@ import { FeatureValue } from './FeatureState';
  * @param feature The feature to check
  */
 
-export default function testFeature(feature: string, states: FeaturesState[]): FeatureValue {
+export default function testFeature(
+  feature: string,
+  states: FeaturesState[],
+): FeatureValue {
   const values = states.map((state) => valueOfFeature(state, feature));
 
   // look for best forced option, in order

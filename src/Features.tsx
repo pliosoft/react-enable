@@ -1,11 +1,10 @@
-import React, { useMemo, ReactNode, useEffect, useRef } from 'react';
-
 import { useMachine } from '@xstate/react';
+import React, { type ReactNode, useEffect, useMemo, useRef } from 'react';
 
 import { EnableContext } from './EnableContext';
 import { FeatureContext } from './FeatureContext';
+import type { FeatureDescription } from './FeatureState';
 import { FeaturesMachine } from './FeaturesState';
-import { FeatureDescription } from './FeatureState';
 import useConsoleOverride from './useConsoleOverride';
 import usePersist, { KEY } from './usePersist';
 import useTestCallback from './useTestCallback';
@@ -61,7 +60,11 @@ export function Features({
       type: 'INIT',
       features: featuresRef.current
         .filter((x) => x.noOverride !== true)
-        .map((x) => ({ name: x.name, description: x.description, defaultValue: f?.[x.name] ?? undefined })),
+        .map((x) => ({
+          name: x.name,
+          description: x.description,
+          defaultValue: f?.[x.name] ?? undefined,
+        })),
     });
 
     return () => {
@@ -72,7 +75,12 @@ export function Features({
   usePersist(storage, featuresRef.current, overridesState);
 
   const testCallback = useTestCallback(overridesState, defaultsState);
-  useConsoleOverride(!disableConsole, featuresRef.current, testCallback, defaultsSend);
+  useConsoleOverride(
+    !disableConsole,
+    featuresRef.current,
+    testCallback,
+    defaultsSend,
+  );
 
   const featureValue = useMemo(
     () => ({
@@ -83,12 +91,14 @@ export function Features({
       defaultsState,
       test: testCallback,
     }),
-    [overridesSend, defaultsSend, overridesState, defaultsState, testCallback]
+    [overridesSend, defaultsSend, overridesState, defaultsState, testCallback],
   );
 
   return (
     <FeatureContext.Provider value={featureValue}>
-      <EnableContext.Provider value={testCallback}>{children}</EnableContext.Provider>
+      <EnableContext.Provider value={testCallback}>
+        {children}
+      </EnableContext.Provider>
     </FeatureContext.Provider>
   );
 }

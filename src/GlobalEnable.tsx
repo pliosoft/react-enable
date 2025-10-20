@@ -1,5 +1,5 @@
-import { FeaturesDispatch } from './FeaturesState';
-import { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeaturesDispatch } from './FeaturesState';
 
 export class GlobalEnable {
   private readonly featureDesc: readonly FeatureDescription[];
@@ -9,7 +9,7 @@ export class GlobalEnable {
   constructor(
     dispatch: FeaturesDispatch,
     testFeature: (_: string) => FeatureValue,
-    featureDesc: readonly FeatureDescription[]
+    featureDesc: readonly FeatureDescription[],
   ) {
     this.featureDesc = featureDesc;
     this.dispatch = dispatch;

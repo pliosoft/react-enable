@@ -1,6 +1,5 @@
-import * as React from 'react';
-
 import { render } from '@testing-library/react';
+import * as React from 'react';
 
 import { Disable } from './Disable';
 import { Enable } from './Enable';
@@ -31,7 +30,7 @@ describe('Enable Component', () => {
         <Enable feature="Feature 1">
           <div>Feature 1 Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('Feature 1 Content')).toBeTruthy();
@@ -43,7 +42,7 @@ describe('Enable Component', () => {
         <Enable feature="Feature 2">
           <div>Feature 2 Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Feature 2 Content')).toBeNull();
@@ -55,7 +54,7 @@ describe('Enable Component', () => {
         <Enable feature={['Feature 1', 'Feature 2']}>
           <div>Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('Content')).toBeTruthy();
@@ -67,7 +66,7 @@ describe('Enable Component', () => {
         <Enable feature={['Feature 2']}>
           <div>Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Content')).toBeNull();
@@ -79,7 +78,7 @@ describe('Enable Component', () => {
         <Enable allFeatures={['Feature 1', 'Feature 3']}>
           <div>All Enabled Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('All Enabled Content')).toBeTruthy();
@@ -91,7 +90,7 @@ describe('Enable Component', () => {
         <Enable allFeatures={['Feature 1', 'Feature 2']}>
           <div>All Enabled Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('All Enabled Content')).toBeNull();
@@ -103,7 +102,7 @@ describe('Enable Component', () => {
         <Enable feature="Feature 1" allFeatures={['Feature 2']}>
           <div>Either Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('Either Content')).toBeTruthy();
@@ -115,7 +114,7 @@ describe('Enable Component', () => {
         <Enable feature={[]}>
           <div>Empty Array Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Empty Array Content')).toBeNull();
@@ -127,7 +126,7 @@ describe('Enable Component', () => {
         <Enable>
           <div>Undefined Feature Content</div>
         </Enable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Undefined Feature Content')).toBeNull();
@@ -137,7 +136,7 @@ describe('Enable Component', () => {
     const { queryByText } = render(
       <Enable feature="Feature 1">
         <div>No Context Content</div>
-      </Enable>
+      </Enable>,
     );
 
     expect(queryByText('No Context Content')).toBeNull();
@@ -151,7 +150,7 @@ describe('Disable Component', () => {
         <Disable feature="Feature 2">
           <div>Feature 2 Disabled Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('Feature 2 Disabled Content')).toBeTruthy();
@@ -163,7 +162,7 @@ describe('Disable Component', () => {
         <Disable feature="Feature 1">
           <div>Feature 1 Disabled Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Feature 1 Disabled Content')).toBeNull();
@@ -175,7 +174,7 @@ describe('Disable Component', () => {
         <Disable feature={['Feature 1', 'Feature 2']}>
           <div>Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('Content')).toBeTruthy();
@@ -187,7 +186,7 @@ describe('Disable Component', () => {
         <Disable feature={['Feature 1', 'Feature 3']}>
           <div>Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Content')).toBeNull();
@@ -199,7 +198,7 @@ describe('Disable Component', () => {
         <Disable allFeatures={['Feature 2']}>
           <div>All Disabled Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('All Disabled Content')).toBeTruthy();
@@ -211,7 +210,7 @@ describe('Disable Component', () => {
         <Disable allFeatures={['Feature 1', 'Feature 2']}>
           <div>All Disabled Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('All Disabled Content')).toBeNull();
@@ -223,7 +222,7 @@ describe('Disable Component', () => {
         <Disable feature="Feature 2" allFeatures={['Feature 1']}>
           <div>Either Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(getByText('Either Content')).toBeTruthy();
@@ -235,7 +234,7 @@ describe('Disable Component', () => {
         <Disable feature={[]}>
           <div>Empty Array Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Empty Array Content')).toBeNull();
@@ -247,7 +246,7 @@ describe('Disable Component', () => {
         <Disable>
           <div>Undefined Feature Content</div>
         </Disable>
-      </Features>
+      </Features>,
     );
 
     expect(queryByText('Undefined Feature Content')).toBeNull();
@@ -257,7 +256,7 @@ describe('Disable Component', () => {
     const { getByText } = render(
       <Disable feature="Feature 1">
         <div>No Context Content</div>
-      </Disable>
+      </Disable>,
     );
 
     expect(getByText('No Context Content')).toBeTruthy();

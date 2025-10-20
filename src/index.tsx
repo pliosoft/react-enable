@@ -1,13 +1,18 @@
-export { FeaturesMachine } from './FeaturesState';
-export { Features } from './Features';
-export { Enable } from './Enable';
 export { Disable } from './Disable';
-export { useDisabled } from './useDisabled';
-export { useEnabled } from './useEnabled';
+export { Enable } from './Enable';
+export type { EnableContextType } from './EnableContext';
+export { EnableContext } from './EnableContext';
+export type { FeatureContextType } from './FeatureContext';
+export type {
+  FeatureDescription,
+  FeatureDispatch,
+  FeatureState,
+  FeatureValue,
+} from './FeatureState';
+export { Features } from './Features';
+export { FeaturesMachine } from './FeaturesState';
+export { ToggleFeatures } from './ToggleFeatures';
 export { useAllDisabled } from './useAllDisabled';
 export { useAllEnabled } from './useAllEnabled';
-export type { EnableContextType } from './EnableContext';
-export type { FeatureContextType } from './FeatureContext';
-export type { FeatureValue, FeatureState, FeatureDescription, FeatureDispatch } from './FeatureState';
-export { EnableContext } from './EnableContext';
-export { ToggleFeatures } from './ToggleFeatures';
+export { useDisabled } from './useDisabled';
+export { useEnabled } from './useEnabled';

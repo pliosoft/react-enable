@@ -1,11 +1,15 @@
-import React, { useContext, useState, useCallback, ReactNode } from 'react';
+import { RadioGroup } from '@headlessui/react';
+import React, {
+  type ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
 import ReactDOM from 'react-dom';
 
-import { RadioGroup } from '@headlessui/react';
-
 import { FeatureContext } from './FeatureContext';
+import type { FeatureDescription } from './FeatureState';
 import { valueOfFeature } from './FeaturesState';
-import { FeatureDescription } from './FeatureState';
 // @ts-expect-error bundler will take care of this
 import styles from './tailwind.css';
 
@@ -13,7 +17,11 @@ function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Element | null {
+function ToggleFeature({
+  feature,
+}: {
+  feature: FeatureDescription;
+}): JSX.Element | null {
   const context = useContext(FeatureContext);
   const handleChangeSelection = useCallback(
     (value: 'false' | 'true' | 'unset') => {
@@ -34,7 +42,7 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
         }
       }
     },
-    [feature.name, context]
+    [feature.name, context],
   );
 
   if (context == null) {
@@ -43,20 +51,22 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
 
   const { overridesState, test: testFeature, defaultsState } = context;
 
-  const valueInDefaults = (valueOfFeature(defaultsState, feature.name)[0] ?? 'unset').toString() as
-    | 'false'
-    | 'true'
-    | 'unset';
+  const valueInDefaults = (
+    valueOfFeature(defaultsState, feature.name)[0] ?? 'unset'
+  ).toString() as 'false' | 'true' | 'unset';
 
-  const valueInOverrides = (valueOfFeature(overridesState, feature.name)[0] ?? 'unset').toString() as
-    | 'false'
-    | 'true'
-    | 'unset';
+  const valueInOverrides = (
+    valueOfFeature(overridesState, feature.name)[0] ?? 'unset'
+  ).toString() as 'false' | 'true' | 'unset';
 
   const actualChecked = testFeature(feature.name);
 
   return (
-    <RadioGroup disabled={feature.noOverride} onChange={handleChangeSelection} value={valueInOverrides}>
+    <RadioGroup
+      disabled={feature.noOverride}
+      onChange={handleChangeSelection}
+      value={valueInOverrides}
+    >
       <RadioGroup.Label>
         <h6 className="text-gray-900 align-center flex flex-row flex-nowrap items-center gap-2 lg:gap-4 h-7">
           <span className="font-medium">
@@ -99,11 +109,19 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
             </div>
           ) : null}
         </h6>
-        {feature.description == null ? null : <p className="text-base text-gray-500 text-sm">{feature.description}</p>}
+        {feature.description == null ? null : (
+          <p className="text-base text-gray-500 text-sm">
+            {feature.description}
+          </p>
+        )}
       </RadioGroup.Label>
       <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
         {[
-          { id: 'false', title: `Disable ${feature.name}`, description: 'Override the feature to be disabled' },
+          {
+            id: 'false',
+            title: `Disable ${feature.name}`,
+            description: 'Override the feature to be disabled',
+          },
           {
             id: 'unset',
             title: 'Default',
@@ -120,15 +138,23 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
                 </div>
               ),
           },
-          { id: 'true', title: `Enable ${feature.name}`, description: 'Override the feature to be enabled' },
+          {
+            id: 'true',
+            title: `Enable ${feature.name}`,
+            description: 'Override the feature to be enabled',
+          },
         ].map((option) => (
           <RadioGroup.Option
             className={({ checked, active, disabled }) =>
               classNames(
                 checked ? 'border-transparent' : 'border-gray-300',
-                !disabled && active ? 'border-blue-500 ring-2 ring-blue-500' : '',
-                disabled ? 'border-transparent ring-gray-500 cursor-not-allowed' : 'cursor-pointer',
-                'relative bg-white border rounded-lg shadow-sm p-3 flex focus:outline-none'
+                !disabled && active
+                  ? 'border-blue-500 ring-2 ring-blue-500'
+                  : '',
+                disabled
+                  ? 'border-transparent ring-gray-500 cursor-not-allowed'
+                  : 'cursor-pointer',
+                'relative bg-white border rounded-lg shadow-sm p-3 flex focus:outline-none',
               )
             }
             disabled={option.disabled}
@@ -138,12 +164,20 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
             {({ checked, active, disabled }) => (
               <>
                 <div className="flex flex-col grow">
-                  <RadioGroup.Label as="span" className="flex flex-nowrap flex-row gap-1 items-center space-between">
-                    <span className="text-sm font-medium text-gray-900 grow shrink">{option.title}</span>
+                  <RadioGroup.Label
+                    as="span"
+                    className="flex flex-nowrap flex-row gap-1 items-center space-between"
+                  >
+                    <span className="text-sm font-medium text-gray-900 grow shrink">
+                      {option.title}
+                    </span>
                     {option.defaultValue != null ? option.defaultValue : null}
                     <svg
                       aria-hidden="true"
-                      className={classNames(!checked ? 'invisible' : '', 'h-5 w-5 text-blue-500 min-w-4')}
+                      className={classNames(
+                        !checked ? 'invisible' : '',
+                        'h-5 w-5 text-blue-500 min-w-4',
+                      )}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       xmlns="http://www.w3.org/2000/svg"
@@ -155,7 +189,10 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
                       />
                     </svg>
                   </RadioGroup.Label>
-                  <RadioGroup.Description as="span" className="mt-1 flex items-center text-sm text-gray-500">
+                  <RadioGroup.Description
+                    as="span"
+                    className="mt-1 flex items-center text-sm text-gray-500"
+                  >
                     {option.description}
                   </RadioGroup.Description>
                 </div>
@@ -163,8 +200,12 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
                   aria-hidden="true"
                   className={classNames(
                     !disabled && active ? 'border' : 'border-2',
-                    checked ? (disabled ? 'border-gray-500' : 'border-blue-500') : 'border-transparent',
-                    'absolute -inset-px rounded-lg pointer-events-none'
+                    checked
+                      ? disabled
+                        ? 'border-gray-500'
+                        : 'border-blue-500'
+                      : 'border-transparent',
+                    'absolute -inset-px rounded-lg pointer-events-none',
                   )}
                 />
               </>
@@ -176,7 +217,13 @@ function ToggleFeature({ feature }: { feature: FeatureDescription }): JSX.Elemen
   );
 }
 
-function ShadowContent({ root, children }: { children: ReactNode; root: Element }) {
+function ShadowContent({
+  root,
+  children,
+}: {
+  children: ReactNode;
+  root: Element;
+}) {
   return ReactDOM.createPortal(children, root);
 }
 
@@ -185,7 +232,13 @@ function ShadowContent({ root, children }: { children: ReactNode; root: Element 
 /// a list of features to toggle and their current override state. you can override on or override off,
 /// or unset the override and go back to default value.
 // eslint-disable-next-line no-undef
-export function ToggleFeatures({ defaultOpen = false, hidden = false }: { defaultOpen?: boolean; hidden?: boolean }): JSX.Element | null {
+export function ToggleFeatures({
+  defaultOpen = false,
+  hidden = false,
+}: {
+  defaultOpen?: boolean;
+  hidden?: boolean;
+}): JSX.Element | null {
   const [root, setCoreRoot] = useState<HTMLDivElement | null>(null);
 
   const setRoot = (host: HTMLDivElement | null) => {
@@ -206,7 +259,16 @@ export function ToggleFeatures({ defaultOpen = false, hidden = false }: { defaul
   }
 
   return (
-    <div ref={setRoot} style={{ zIndex: 99999, position: 'fixed', width: '0', height: '0', bottom: 0 }}>
+    <div
+      ref={setRoot}
+      style={{
+        zIndex: 99999,
+        position: 'fixed',
+        width: '0',
+        height: '0',
+        bottom: 0,
+      }}
+    >
       {root != null ? (
         <ShadowContent root={root}>
           <ToggleFeatureUnwrapped defaultOpen={defaultOpen} />
@@ -218,7 +280,13 @@ export function ToggleFeatures({ defaultOpen = false, hidden = false }: { defaul
 
 /// Like ToggleFeatures, but does not inject styles into a shadow DOM root node.
 /// useful if you're using tailwind.
-export function ToggleFeatureUnwrapped({ defaultOpen = false, hidden = false }: { defaultOpen?: boolean; hidden?: boolean }): JSX.Element | null {
+export function ToggleFeatureUnwrapped({
+  defaultOpen = false,
+  hidden = false,
+}: {
+  defaultOpen?: boolean;
+  hidden?: boolean;
+}): JSX.Element | null {
   const [open, setOpen] = useState(defaultOpen);
   const context = useContext(FeatureContext);
 
@@ -267,10 +335,13 @@ export function ToggleFeatureUnwrapped({ defaultOpen = false, hidden = false }: 
               <div>
                 <div className="mt-1 sm:mt-3">
                   <h3 className="flex flex-row gap-4 flex-nowrap items-center space-between">
-                    <div className="grow text-lg leading-6 font-medium text-gray-900">Feature Flag Overrides</div>
+                    <div className="grow text-lg leading-6 font-medium text-gray-900">
+                      Feature Flag Overrides
+                    </div>
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Features can be enabled or disabled unless they are forced upstream. You can also revert to default.
+                    Features can be enabled or disabled unless they are forced
+                    upstream. You can also revert to default.
                   </p>
                   <div className="mt-6">
                     <fieldset className="flex flex-col gap-9">

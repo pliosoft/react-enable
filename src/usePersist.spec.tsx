@@ -1,8 +1,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { interpret } from 'xstate';
-
-import { FeaturesMachine, FeaturesState } from './FeaturesState';
-import { FeatureDescription } from './FeatureState';
+import type { FeatureDescription } from './FeatureState';
+import { FeaturesMachine, type FeaturesState } from './FeaturesState';
 import usePersist, { KEY } from './usePersist';
 
 class LocalStorageMock {
@@ -42,7 +41,11 @@ function createReadyState(features: FeatureDescription[]): FeaturesState {
   return service.getSnapshot();
 }
 
-function setFeatureInState(state: FeaturesState, name: string, value: boolean | undefined): FeaturesState {
+function setFeatureInState(
+  state: FeaturesState,
+  name: string,
+  value: boolean | undefined,
+): FeaturesState {
   const service = interpret(FeaturesMachine).start(state);
   service.send({ type: 'SET', name, value });
   return service.getSnapshot();
@@ -96,9 +99,12 @@ describe('usePersist', () => {
     const storage = new LocalStorageMock();
     let state = createReadyState(testFeatures);
 
-    const { rerender } = renderHook(({ overrideState }) => usePersist(storage, testFeatures, overrideState), {
-      initialProps: { overrideState: state },
-    });
+    const { rerender } = renderHook(
+      ({ overrideState }) => usePersist(storage, testFeatures, overrideState),
+      {
+        initialProps: { overrideState: state },
+      },
+    );
 
     expect(storage.getItem(KEY)).toBe('{}');
 
@@ -177,11 +183,17 @@ describe('usePersist', () => {
     let state = createReadyState(testFeatures);
     state = setFeatureInState(state, 'Feature1', true);
 
-    const { rerender } = renderHook(({ features }) => usePersist(storage, features, state), {
-      initialProps: { features: testFeatures },
-    });
+    const { rerender } = renderHook(
+      ({ features }) => usePersist(storage, features, state),
+      {
+        initialProps: { features: testFeatures },
+      },
+    );
 
-    const newFeatures = [...testFeatures, { name: 'Feature4', description: 'New Feature', defaultValue: false }];
+    const newFeatures = [
+      ...testFeatures,
+      { name: 'Feature4', description: 'New Feature', defaultValue: false },
+    ];
     rerender({ features: newFeatures });
 
     const stored = JSON.parse(storage.getItem(KEY) ?? '{}');
