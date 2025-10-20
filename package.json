@@ -17,7 +17,10 @@
     "watch-js": "./scripts/build.mjs --watch",
     "watch-css": "npx tailwindcss -i ./src/in-tailwind.css -o ./src/tailwind.css --watch",
     "watch": "concurrently 'npm:watch-*'",
-    "test": "npx jest --watch"
+    "test": "npx jest --watch",
+    "test:ci": "npx jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
