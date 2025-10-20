@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react-hooks';
+// biome-ignore lint/style/useImportType: JSX requires React at runtime
 import * as React from 'react';
 
 import { EnableContext } from './EnableContext';

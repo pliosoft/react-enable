@@ -70,7 +70,7 @@ export function Features({
     return () => {
       overridesSend({ type: 'DE_INIT' });
     };
-  }, [featuresRef, overridesSend, storage]);
+  }, [overridesSend, storage]);
 
   usePersist(storage, featuresRef.current, overridesState);
 
