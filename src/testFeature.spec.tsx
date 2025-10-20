@@ -1,7 +1,7 @@
 import { interpret } from 'xstate';
 
-import testFeature from './testFeature';
 import { FeaturesMachine, FeaturesState } from './FeaturesState';
+import testFeature from './testFeature';
 
 // Helper function to create a features state with specific feature values
 function createFeaturesState(
@@ -80,7 +80,7 @@ describe('testFeature', () => {
       let state1 = createFeaturesState([{ name: 'Feature1', defaultValue: false }]);
       state1 = setFeatureValue(state1, 'Feature1', undefined);
 
-      let state2 = createFeaturesState([{ name: 'Feature1', defaultValue: true }]);
+      const state2 = createFeaturesState([{ name: 'Feature1', defaultValue: true }]);
 
       const result = testFeature('Feature1', [state1, state2]);
       expect(result).toBe(true);
@@ -93,7 +93,7 @@ describe('testFeature', () => {
       let state2 = createFeaturesState([{ name: 'Feature1', defaultValue: false }]);
       state2 = setFeatureValue(state2, 'Feature1', undefined);
 
-      let state3 = createFeaturesState([{ name: 'Feature1', defaultValue: true }]);
+      const state3 = createFeaturesState([{ name: 'Feature1', defaultValue: true }]);
 
       const result = testFeature('Feature1', [state1, state2, state3]);
       expect(result).toBe(true);
@@ -193,8 +193,8 @@ describe('testFeature', () => {
     });
 
     it('should handle mixed presence of feature across states', () => {
-      let state1 = createFeaturesState([{ name: 'Other' }]);
-      let state2 = createFeaturesState([{ name: 'Feature1', defaultValue: true }]);
+      const state1 = createFeaturesState([{ name: 'Other' }]);
+      const state2 = createFeaturesState([{ name: 'Feature1', defaultValue: true }]);
 
       const result = testFeature('Feature1', [state1, state2]);
       expect(result).toBe(true);

@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import { render } from '@testing-library/react';
 
-import { Enable } from './Enable';
 import { Disable } from './Disable';
+import { Enable } from './Enable';
 import { Features } from './Features';
 
 const testFeatures = [

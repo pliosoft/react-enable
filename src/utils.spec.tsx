@@ -2,13 +2,13 @@ import * as React from 'react';
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useTestAndConvert } from './utils';
 import { EnableContext } from './EnableContext';
 import { FeatureValue } from './FeatureState';
+import { useTestAndConvert } from './utils';
 
 describe('useTestAndConvert', () => {
   const mockTest = jest.fn((feature: string): FeatureValue => {
-    return feature === 'EnabledFeature' ? true : false;
+    return feature === 'EnabledFeature';
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -23,14 +23,14 @@ describe('useTestAndConvert', () => {
     it('should return the test function from context', () => {
       const { result } = renderHook(() => useTestAndConvert('Feature1'), { wrapper });
 
-      const [test, _] = result.current;
+      const [test] = result.current;
       expect(test).toBe(mockTest);
     });
 
     it('should return default context value when no provider exists', () => {
       const { result } = renderHook(() => useTestAndConvert('Feature1'));
 
-      const [test, _] = result.current;
+      const [test] = result.current;
       // Default context returns false for any feature
       expect(test('anyFeature')).toBe(false);
     });
@@ -40,14 +40,14 @@ describe('useTestAndConvert', () => {
     it('should convert string to array with single element', () => {
       const { result } = renderHook(() => useTestAndConvert('Feature1'), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual(['Feature1']);
     });
 
     it('should handle empty string', () => {
       const { result } = renderHook(() => useTestAndConvert(''), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual(['']);
     });
   });
@@ -57,21 +57,21 @@ describe('useTestAndConvert', () => {
       const input = ['Feature1', 'Feature2', 'Feature3'];
       const { result } = renderHook(() => useTestAndConvert(input), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual(input);
     });
 
     it('should handle empty array', () => {
       const { result } = renderHook(() => useTestAndConvert([]), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual([]);
     });
 
     it('should handle array with one element', () => {
       const { result } = renderHook(() => useTestAndConvert(['SingleFeature']), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual(['SingleFeature']);
     });
   });
@@ -80,21 +80,21 @@ describe('useTestAndConvert', () => {
     it('should convert undefined to empty array', () => {
       const { result } = renderHook(() => useTestAndConvert(undefined), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual([]);
     });
 
     it('should convert null to empty array', () => {
       const { result } = renderHook(() => useTestAndConvert(null), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual([]);
     });
 
     it('should convert no argument to empty array', () => {
       const { result } = renderHook(() => useTestAndConvert(), { wrapper });
 
-      const [_, converted] = result.current;
+      const [, converted] = result.current;
       expect(converted).toEqual([]);
     });
   });
@@ -103,7 +103,7 @@ describe('useTestAndConvert', () => {
     it('should memoize the converted array for same input', () => {
       const { result, rerender } = renderHook(({ input }) => useTestAndConvert(input), {
         wrapper,
-        initialProps: { input: 'Feature1' as string | string[] | null | undefined },
+        initialProps: { input: 'Feature1' as string[] | string | null | undefined },
       });
 
       const firstResult = result.current[1];
@@ -116,7 +116,7 @@ describe('useTestAndConvert', () => {
     it('should return new array when input changes', () => {
       const { result, rerender } = renderHook(({ input }) => useTestAndConvert(input), {
         wrapper,
-        initialProps: { input: 'Feature1' as string | string[] | null | undefined },
+        initialProps: { input: 'Feature1' as string[] | string | null | undefined },
       });
 
       const firstResult = result.current[1];
@@ -131,7 +131,7 @@ describe('useTestAndConvert', () => {
     it('should memoize empty array for null input', () => {
       const { result, rerender } = renderHook(({ input }) => useTestAndConvert(input), {
         wrapper,
-        initialProps: { input: null as string | string[] | null | undefined },
+        initialProps: { input: null as string[] | string | null | undefined },
       });
 
       const firstResult = result.current[1];
@@ -145,7 +145,7 @@ describe('useTestAndConvert', () => {
     it('should return new array when switching from null to undefined', () => {
       const { result, rerender } = renderHook(({ input }) => useTestAndConvert(input), {
         wrapper,
-        initialProps: { input: null as string | string[] | null | undefined },
+        initialProps: { input: null as string[] | string | null | undefined },
       });
 
       const firstResult = result.current[1];
@@ -164,7 +164,7 @@ describe('useTestAndConvert', () => {
 
       const { result, rerender } = renderHook(({ input }) => useTestAndConvert(input), {
         wrapper,
-        initialProps: { input: array1 as string | string[] | null | undefined },
+        initialProps: { input: array1 as string[] | string | null | undefined },
       });
 
       const firstResult = result.current[1];

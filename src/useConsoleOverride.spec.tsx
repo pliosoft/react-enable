@@ -1,9 +1,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 
-import useConsoleOverride from './useConsoleOverride';
-import { GlobalEnable } from './GlobalEnable';
-import { FeatureDescription, FeatureValue } from './FeatureState';
 import { FeaturesDispatch } from './FeaturesState';
+import { FeatureDescription, FeatureValue } from './FeatureState';
+import { GlobalEnable } from './GlobalEnable';
+import useConsoleOverride from './useConsoleOverride';
 
 describe('useConsoleOverride', () => {
   const testFeatures: FeatureDescription[] = [
@@ -12,18 +12,22 @@ describe('useConsoleOverride', () => {
   ];
 
   const mockTestFeature = (name: string): FeatureValue => {
-    return name === 'Feature2' ? true : false;
+    return name === 'Feature2';
   };
 
   const mockDispatch: FeaturesDispatch = jest.fn();
 
   beforeEach(() => {
-    delete (window as any).feature;
+    if (window.feature !== undefined) {
+      delete window.feature;
+    }
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    delete (window as any).feature;
+    if (window.feature !== undefined) {
+      delete window.feature;
+    }
   });
 
   it('should set window.feature when consoleOverride is true', () => {
@@ -110,7 +114,7 @@ describe('GlobalEnable', () => {
   ];
 
   const mockTestFeature = jest.fn((name: string): FeatureValue => {
-    return name === 'Feature2' ? true : false;
+    return name === 'Feature2';
   });
 
   const mockDispatch = jest.fn();
@@ -120,7 +124,7 @@ describe('GlobalEnable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockTestFeature.mockImplementation((name: string): FeatureValue => {
-      return name === 'Feature2' ? true : false;
+      return name === 'Feature2';
     });
     globalEnable = new GlobalEnable(mockDispatch, mockTestFeature, testFeatures);
   });
@@ -223,8 +227,8 @@ describe('GlobalEnable', () => {
 
     it('should return current feature values', () => {
       mockTestFeature.mockImplementation((name: string): FeatureValue => {
-        if (name === 'Feature1') return true;
-        if (name === 'Feature2') return false;
+        if (name === 'Feature1') {return true;}
+        if (name === 'Feature2') {return false;}
         return undefined;
       });
 

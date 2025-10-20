@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { Features } from './Features';
-import { useEnabled, useDisabled, useAllEnabled, useAllDisabled } from './index';
 import { FeatureContext } from './FeatureContext';
+import { Features } from './Features';
 import { FeatureDescription } from './FeatureState';
+import { useAllEnabled, useDisabled, useEnabled } from './index';
 
 class LocalStorageMock {
   store: Record<string, string>;
@@ -28,7 +28,8 @@ class LocalStorageMock {
   }
 
   removeItem(key: string) {
-    delete this.store[key];
+    const { [key]: _, ...rest } = this.store;
+    this.store = rest;
   }
 
   key(_: number): string | null {
@@ -383,11 +384,15 @@ describe('Integration Tests - Public API', () => {
 
   describe('console override integration', () => {
     beforeEach(() => {
-      delete (window as any).feature;
+      if (window.feature !== undefined) {
+        delete window.feature;
+      }
     });
 
     afterEach(() => {
-      delete (window as any).feature;
+      if (window.feature !== undefined) {
+        delete window.feature;
+      }
     });
 
     it('should expose window.feature when consoleOverride is true', () => {

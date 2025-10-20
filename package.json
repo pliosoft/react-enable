@@ -40,6 +40,7 @@
   "homepage": "https://github.com/pliosoft/react-enable#readme",
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.0",
+    "@testing-library/react": "^12.1.5",
     "@testing-library/react-hooks": "^8.0.0",
     "@types/jest": "^26",
     "@types/react": "^17",

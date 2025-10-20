@@ -1,9 +1,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { interpret } from 'xstate';
 
-import usePersist, { KEY } from './usePersist';
 import { FeaturesMachine, FeaturesState } from './FeaturesState';
 import { FeatureDescription } from './FeatureState';
+import usePersist, { KEY } from './usePersist';
 
 class LocalStorageMock {
   store: Record<string, string>;
@@ -26,7 +26,8 @@ class LocalStorageMock {
   }
 
   removeItem(key: string) {
-    delete this.store[key];
+    const { [key]: _, ...rest } = this.store;
+    this.store = rest;
   }
 
   key(_: number): string | null {
@@ -70,7 +71,7 @@ describe('usePersist', () => {
 
     renderHook(() => usePersist(storage, testFeatures, state));
 
-    const stored = JSON.parse(storage.getItem(KEY) || '{}');
+    const stored = JSON.parse(storage.getItem(KEY) ?? '{}');
     expect(stored.overrides).toEqual({ Feature1: true });
   });
 
@@ -83,7 +84,7 @@ describe('usePersist', () => {
 
     renderHook(() => usePersist(storage, testFeatures, state));
 
-    const stored = JSON.parse(storage.getItem(KEY) || '{}');
+    const stored = JSON.parse(storage.getItem(KEY) ?? '{}');
     expect(stored.overrides).toEqual({
       Feature1: true,
       Feature2: false,
@@ -104,7 +105,7 @@ describe('usePersist', () => {
     state = setFeatureInState(state, 'Feature1', true);
     rerender({ overrideState: state });
 
-    const stored = JSON.parse(storage.getItem(KEY) || '{}');
+    const stored = JSON.parse(storage.getItem(KEY) ?? '{}');
     expect(stored.overrides).toEqual({ Feature1: true });
   });
 
@@ -152,7 +153,7 @@ describe('usePersist', () => {
 
     renderHook(() => usePersist(storage, testFeatures, state));
 
-    const stored = JSON.parse(storage.getItem(KEY) || '{}');
+    const stored = JSON.parse(storage.getItem(KEY) ?? '{}');
     expect(stored.overrides).toEqual({
       Feature1: true,
       Feature3: false,
@@ -183,7 +184,7 @@ describe('usePersist', () => {
     const newFeatures = [...testFeatures, { name: 'Feature4', description: 'New Feature', defaultValue: false }];
     rerender({ features: newFeatures });
 
-    const stored = JSON.parse(storage.getItem(KEY) || '{}');
+    const stored = JSON.parse(storage.getItem(KEY) ?? '{}');
     expect(stored.overrides).toEqual({ Feature1: true });
   });
 
@@ -195,7 +196,7 @@ describe('usePersist', () => {
 
     renderHook(() => usePersist(storage, testFeatures, state));
 
-    const stored = JSON.parse(storage.getItem(KEY) || '{}');
+    const stored = JSON.parse(storage.getItem(KEY) ?? '{}');
     expect(stored.overrides.Feature1).toBe(true);
     expect(stored.overrides.Feature2).toBe(false);
     expect(typeof stored.overrides.Feature1).toBe('boolean');

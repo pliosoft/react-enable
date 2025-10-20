@@ -1,13 +1,10 @@
 import * as React from 'react';
 
-import { render, fireEvent, screen, within } from '@testing-library/react';
-import { interpret } from 'xstate';
+import { fireEvent, render, screen } from '@testing-library/react';
 
-import { ToggleFeatureUnwrapped } from './ToggleFeatures';
 import { Features } from './Features';
-import { FeatureContext } from './FeatureContext';
 import { FeatureDescription } from './FeatureState';
-import { FeaturesMachine, FeaturesState, FeaturesDispatch } from './FeaturesState';
+import { ToggleFeatureUnwrapped } from './ToggleFeatures';
 
 const mockFeatures: FeatureDescription[] = [
   {
@@ -27,26 +24,6 @@ const mockFeatures: FeatureDescription[] = [
     noOverride: true,
   },
 ];
-
-function createMockContext(features: FeatureDescription[]): {
-  defaultsState: FeaturesState;
-  overridesState: FeaturesState;
-  dispatch: FeaturesDispatch;
-} {
-  const defaultsService = interpret(FeaturesMachine);
-  defaultsService.start();
-  defaultsService.send({ type: 'INIT', features });
-
-  const overridesService = interpret(FeaturesMachine);
-  overridesService.start();
-  overridesService.send({ type: 'INIT', features });
-
-  return {
-    defaultsState: defaultsService.getSnapshot(),
-    overridesState: overridesService.getSnapshot(),
-    dispatch: overridesService.send.bind(overridesService),
-  };
-}
 
 describe('ToggleFeatureUnwrapped', () => {
   describe('rendering', () => {
@@ -106,7 +83,7 @@ describe('ToggleFeatureUnwrapped', () => {
 
   describe('modal interactions', () => {
     it('should open modal when toggle button is clicked', () => {
-      const { getByTitle, getByText } = render(
+      const { getByText, getByTitle } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
         </Features>
@@ -119,7 +96,7 @@ describe('ToggleFeatureUnwrapped', () => {
     });
 
     it('should close modal when Done button is clicked', () => {
-      const { getByTitle, getByText, queryByText } = render(
+      const { getByText, queryByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
         </Features>
@@ -160,7 +137,7 @@ describe('ToggleFeatureUnwrapped', () => {
 
   describe('feature display', () => {
     it('should show "Enabled" badge for enabled features', () => {
-      const { getByText } = render(
+      render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
         </Features>
@@ -188,7 +165,7 @@ describe('ToggleFeatureUnwrapped', () => {
       );
 
       const codeElements = container.querySelectorAll('code');
-      const featureNames = Array.from(codeElements).map((el) => el.textContent);
+      const featureNames = Array.from(codeElements).map((el) => el.textContent ?? '');
 
       expect(featureNames).toContain('Feature1');
       expect(featureNames).toContain('Feature2');
@@ -231,7 +208,7 @@ describe('ToggleFeatureUnwrapped', () => {
         },
       ];
 
-      const { getByText, queryByText } = render(
+      const { getByText } = render(
         <Features features={featuresNoDesc}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
         </Features>
@@ -265,7 +242,7 @@ describe('ToggleFeatureUnwrapped', () => {
       // We can check this by looking for disabled radio options
       const radioOptions = container.querySelectorAll('[role="radio"]');
       const defaultOption = Array.from(radioOptions).find((option) =>
-        option.textContent?.includes('Default')
+        (option.textContent ?? '').includes('Default')
       );
 
       expect(defaultOption).toHaveAttribute('aria-disabled', 'true');
@@ -274,7 +251,7 @@ describe('ToggleFeatureUnwrapped', () => {
 
   describe('accessibility', () => {
     it('should have proper ARIA labels', () => {
-      const { getByTitle, getByText } = render(
+      const { getByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
         </Features>
@@ -344,7 +321,7 @@ describe('ToggleFeatureUnwrapped', () => {
 
   describe('state management', () => {
     it('should maintain open state across re-renders', () => {
-      const { getByTitle, getByText, rerender } = render(
+      const { getByText, getByTitle, rerender } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
         </Features>
@@ -365,7 +342,7 @@ describe('ToggleFeatureUnwrapped', () => {
     });
 
     it('should reset state when closed and reopened', () => {
-      const { getByTitle, getByText, queryByText } = render(
+      const { getByText, getByTitle, queryByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped />
         </Features>
