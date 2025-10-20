@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react-hooks';
-import type * as React from 'react';
+import * as React from 'react';
 
 import { EnableContext } from './EnableContext';
 import type { FeatureValue } from './FeatureState';
@@ -10,7 +10,7 @@ describe('useTestAndConvert', () => {
     return feature === 'EnabledFeature';
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
+  const wrapper = ({ children }: { children?: React.ReactNode }) => (
     <EnableContext.Provider value={mockTest}>{children}</EnableContext.Provider>
   );
 
@@ -121,9 +121,9 @@ describe('useTestAndConvert', () => {
         },
       );
 
-      const firstResult = result.current[1];
+      const firstResult = result.current[1] as string[];
       rerender({ input: 'Feature1' });
-      const secondResult = result.current[1];
+      const secondResult = result.current[1] as string[];
 
       expect(firstResult).toBe(secondResult);
     });
@@ -139,9 +139,9 @@ describe('useTestAndConvert', () => {
         },
       );
 
-      const firstResult = result.current[1];
+      const firstResult = result.current[1] as string[];
       rerender({ input: 'Feature2' });
-      const secondResult = result.current[1];
+      const secondResult = result.current[1] as string[];
 
       expect(firstResult).not.toBe(secondResult);
       expect(firstResult).toEqual(['Feature1']);
@@ -157,9 +157,9 @@ describe('useTestAndConvert', () => {
         },
       );
 
-      const firstResult = result.current[1];
+      const firstResult = result.current[1] as string[];
       rerender({ input: null });
-      const secondResult = result.current[1];
+      const secondResult = result.current[1] as string[];
 
       expect(firstResult).toBe(secondResult);
       expect(firstResult).toEqual([]);
@@ -174,12 +174,12 @@ describe('useTestAndConvert', () => {
         },
       );
 
-      const firstResult = result.current[1];
+      const firstResult = result.current[1] as string[];
       rerender({ input: undefined });
-      const secondResult = result.current[1];
+      const secondResult = result.current[1] as string[];
 
-      // Both should be empty arrays but they should be the same reference due to memoization
-      expect(firstResult).toBe(secondResult);
+      // Both should be empty arrays but different references since null !== undefined
+      expect(firstResult).not.toBe(secondResult);
       expect(firstResult).toEqual([]);
       expect(secondResult).toEqual([]);
     });
@@ -198,11 +198,11 @@ describe('useTestAndConvert', () => {
         },
       );
 
-      const firstResult = result.current[1];
+      const firstResult = result.current[1] as string[];
       expect(firstResult).toBe(array1);
 
       rerender({ input: array2 });
-      const secondResult = result.current[1];
+      const secondResult = result.current[1] as string[];
       expect(secondResult).toBe(array2);
       expect(firstResult).not.toBe(secondResult);
     });

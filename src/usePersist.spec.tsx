@@ -37,7 +37,16 @@ class LocalStorageMock {
 function createReadyState(features: FeatureDescription[]): FeaturesState {
   const service = interpret(FeaturesMachine);
   service.start();
-  service.send({ type: 'INIT', features });
+  // Simulate overrides state: initialize with defaultValue: undefined for all features
+  // (this represents "no overrides set yet")
+  service.send({
+    type: 'INIT',
+    features: features.map((f) => ({
+      name: f.name,
+      description: f.description,
+      defaultValue: undefined,
+    })),
+  });
   return service.getSnapshot();
 }
 
