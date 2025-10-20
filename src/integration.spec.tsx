@@ -58,7 +58,7 @@ describe('Integration Tests - Public API', () => {
     });
 
     it('should update when features are toggled', () => {
-      const { result } = renderHook(
+      const { result, unmount } = renderHook(
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
@@ -74,10 +74,11 @@ describe('Integration Tests - Public API', () => {
       });
 
       expect(result.current.enabled).toBe(true);
+      unmount();
     });
 
     it('should handle enable and disable actions', () => {
-      const { result } = renderHook(
+      const { result, unmount } = renderHook(
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
@@ -97,6 +98,7 @@ describe('Integration Tests - Public API', () => {
         result.current.dispatch?.({ type: 'DISABLE', name: 'Feature1' });
       });
       expect(result.current.enabled).toBe(false);
+      unmount();
     });
   });
 
@@ -111,7 +113,7 @@ describe('Integration Tests - Public API', () => {
     });
 
     it('should update when features are enabled', () => {
-      const { result } = renderHook(
+      const { result, unmount } = renderHook(
         () => {
           const allEnabled = useAllEnabled(['Feature1', 'Feature2']);
           const context = React.useContext(FeatureContext);
@@ -127,6 +129,7 @@ describe('Integration Tests - Public API', () => {
       });
 
       expect(result.current.allEnabled).toBe(true);
+      unmount();
     });
   });
 

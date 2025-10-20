@@ -1,4 +1,4 @@
-import type * as React from 'react';
+import * as React from 'react';
 
 import { useAllEnabled } from './useAllEnabled';
 import { useEnabled } from './useEnabled';
