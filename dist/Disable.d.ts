@@ -1,3 +1,3 @@
-import * as React from "react";
-import { EnableProps } from "./Enable";
+import * as React from 'react';
+import type { EnableProps } from './Enable';
 export declare const Disable: React.FC<EnableProps>;

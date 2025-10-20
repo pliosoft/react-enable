@@ -73,8 +73,6 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.5.0",
-    "@xstate/react": "^3.2.1",
-    "tslib": "^1.14.1",
-    "xstate": "^4.37.0"
+    "tslib": "^1.14.1"
   }
 }

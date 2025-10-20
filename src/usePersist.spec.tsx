@@ -1,7 +1,11 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { interpret } from 'xstate';
+
 import type { FeatureDescription } from './FeatureState';
-import { FeaturesMachine, type FeaturesState } from './FeaturesState';
+import {
+  type FeaturesState,
+  featuresReducer,
+  initialFeaturesState,
+} from './FeaturesState';
 import usePersist, { KEY } from './usePersist';
 
 class LocalStorageMock {
@@ -35,11 +39,9 @@ class LocalStorageMock {
 }
 
 function createReadyState(features: FeatureDescription[]): FeaturesState {
-  const service = interpret(FeaturesMachine);
-  service.start();
   // Simulate overrides state: initialize with defaultValue: undefined for all features
   // (this represents "no overrides set yet")
-  service.send({
+  return featuresReducer(initialFeaturesState, {
     type: 'INIT',
     features: features.map((f) => ({
       name: f.name,
@@ -47,7 +49,6 @@ function createReadyState(features: FeatureDescription[]): FeaturesState {
       defaultValue: undefined,
     })),
   });
-  return service.getSnapshot();
 }
 
 function setFeatureInState(
@@ -55,9 +56,7 @@ function setFeatureInState(
   name: string,
   value: boolean | undefined,
 ): FeaturesState {
-  const service = interpret(FeaturesMachine).start(state);
-  service.send({ type: 'SET', name, value });
-  return service.getSnapshot();
+  return featuresReducer(state, { type: 'SET', name, value });
 }
 
 describe('usePersist', () => {
@@ -150,9 +149,7 @@ describe('usePersist', () => {
 
   it('should not persist if state is not ready', () => {
     const storage = new LocalStorageMock();
-    const service = interpret(FeaturesMachine);
-    service.start();
-    const state = service.getSnapshot(); // idle state
+    const state = initialFeaturesState; // idle state
 
     renderHook(() => usePersist(storage, testFeatures, state));
 

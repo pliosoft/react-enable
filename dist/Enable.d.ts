@@ -4,4 +4,4 @@ export interface EnableProps {
     readonly allFeatures?: string[];
     children: React.ReactNode;
 }
-export declare function Enable({ feature, allFeatures, children }: EnableProps): JSX.Element | null;
+export declare function Enable({ feature, allFeatures, children, }: EnableProps): JSX.Element | null;
