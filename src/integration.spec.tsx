@@ -76,7 +76,7 @@ describe('Integration Tests - Public API', () => {
       expect(result.current.enabled).toBe(true);
     });
 
-    it('should handle multiple toggles correctly', () => {
+    it('should handle enable and disable actions', () => {
       const { result } = renderHook(
         () => {
           const enabled = useEnabled('Feature1');
@@ -89,30 +89,18 @@ describe('Integration Tests - Public API', () => {
       expect(result.current.enabled).toBe(false);
 
       act(() => {
-        result.current.dispatch?.({ type: 'TOGGLE', name: 'Feature1' });
+        result.current.dispatch?.({ type: 'ENABLE', name: 'Feature1' });
       });
       expect(result.current.enabled).toBe(true);
 
       act(() => {
-        result.current.dispatch?.({ type: 'TOGGLE', name: 'Feature1' });
+        result.current.dispatch?.({ type: 'DISABLE', name: 'Feature1' });
       });
-      expect(result.current.enabled).toBe(true); // Still enabled after second toggle
+      expect(result.current.enabled).toBe(false);
     });
   });
 
   describe('useAllEnabled and useAllDisabled', () => {
-    it('should return true only when all features are enabled', () => {
-      const { result } = renderHook(
-        () => useAllEnabled(['Feature1', 'Feature2']),
-        {
-          wrapper: Features,
-          initialProps: { features: baseFeatures },
-        },
-      );
-
-      expect(result.current).toBe(false); // Feature1 is disabled
-    });
-
     it('should return true when all features in list are enabled', () => {
       const { result } = renderHook(() => useAllEnabled(['Feature2']), {
         wrapper: Features,

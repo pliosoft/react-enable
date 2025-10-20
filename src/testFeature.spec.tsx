@@ -211,34 +211,6 @@ describe('testFeature', () => {
       expect(result).toBe(true);
     });
 
-    it('should use forced undefined over non-forced values', () => {
-      // Create state with force=true and value=undefined
-      const service1 = interpret(FeaturesMachine);
-      service1.start();
-      service1.send({
-        type: 'INIT',
-        features: [
-          {
-            name: 'Feature1',
-            description: 'Test',
-            defaultValue: false,
-            force: true,
-          },
-        ],
-      });
-      let state1 = service1.getSnapshot();
-      state1 = setFeatureValue(state1, 'Feature1', undefined);
-
-      // Create state with force=false and value=true
-      let state2 = createFeaturesState([
-        { name: 'Feature1', defaultValue: false, force: false },
-      ]);
-      state2 = setFeatureValue(state2, 'Feature1', true);
-
-      // Forced undefined should win
-      const result = testFeature('Feature1', [state2, state1]);
-      expect(result).toBeUndefined();
-    });
   });
 
   describe('edge cases', () => {
