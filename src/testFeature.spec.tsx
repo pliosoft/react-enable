@@ -210,7 +210,6 @@ describe('testFeature', () => {
       const result = testFeature('Feature1', [state1, state2]);
       expect(result).toBe(true);
     });
-
   });
 
   describe('edge cases', () => {

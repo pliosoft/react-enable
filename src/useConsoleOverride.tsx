@@ -18,7 +18,7 @@ export default function useConsoleOverride(
     window.feature = new GlobalEnable(dispatch, testFeature, features);
     return () => {
       if (window.feature != null) {
-        delete window.feature;
+        window.feature = undefined;
       }
     };
   }, [features, dispatch, consoleOverride, testFeature]);

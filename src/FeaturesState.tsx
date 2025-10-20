@@ -1,9 +1,9 @@
 import {
   type ActorRefFrom,
-  assign,
-  createMachine,
   type InterpreterFrom,
   type StateFrom,
+  assign,
+  createMachine,
   spawn,
 } from 'xstate';
 

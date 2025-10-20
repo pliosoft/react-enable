@@ -1,9 +1,9 @@
 import {
-  assign,
-  createMachine,
   type DoneInvokeEvent,
   type InterpreterFrom,
   type StateFrom,
+  assign,
+  createMachine,
 } from 'xstate';
 
 /**

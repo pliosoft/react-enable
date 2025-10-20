@@ -18,14 +18,14 @@ describe('useConsoleOverride', () => {
 
   beforeEach(() => {
     if (window.feature !== undefined) {
-      delete window.feature;
+      window.feature = undefined;
     }
     jest.clearAllMocks();
   });
 
   afterEach(() => {
     if (window.feature !== undefined) {
-      delete window.feature;
+      window.feature = undefined;
     }
   });
 

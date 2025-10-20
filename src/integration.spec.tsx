@@ -401,13 +401,13 @@ describe('Integration Tests - Public API', () => {
   describe('console override integration', () => {
     beforeEach(() => {
       if (window.feature !== undefined) {
-        delete window.feature;
+        window.feature = undefined;
       }
     });
 
     afterEach(() => {
       if (window.feature !== undefined) {
-        delete window.feature;
+        window.feature = undefined;
       }
     });
 
