@@ -1,4 +1,10 @@
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, StateFrom } from 'xstate';
+import {
+  type DoneInvokeEvent,
+  type InterpreterFrom,
+  type StateFrom,
+  assign,
+  createMachine,
+} from 'xstate';
 
 /**
  * Feature is either on, off, or 'unset',
@@ -10,9 +16,15 @@ export type FeatureState = StateFrom<typeof FeatureMachine>;
 export type FeatureDispatch = InterpreterFrom<typeof FeatureMachine>['send'];
 
 /// Given a featurestate, determine the value (on, off, or unset)
-export function valueForState(featureState: FeatureState): [FeatureValue, boolean] {
+export function valueForState(
+  featureState: FeatureState,
+): [FeatureValue, boolean] {
   return [
-    featureState.matches('enabled') ? true : featureState.matches('disabled') ? false : undefined,
+    featureState.matches('enabled')
+      ? true
+      : featureState.matches('disabled')
+        ? false
+        : undefined,
     featureState.context.featureDesc?.force ?? false,
   ];
 }
@@ -30,7 +42,10 @@ export interface FeatureDescription<K extends string = string> {
   /// when set, the feature will be updated on the backend server, and the result of the async
   /// will be used for the final state after the change. while changing, the feature will be
   /// in the 'changing' state. Also note that the feature will be changed at the "default" layer.
-  readonly onChangeDefault?: (name: K, newValue: FeatureValue) => Promise<FeatureValue>;
+  readonly onChangeDefault?: (
+    name: K,
+    newValue: FeatureValue,
+  ) => Promise<FeatureValue>;
 
   /// if set true, will force the field to what it is set here through layers of states.
   /// useful to invert the layers, similar to !important in CSS.
@@ -91,40 +106,58 @@ export type FeatureAction =
 /**
  * Fully describe the states a feature can be in
  */
-export const FeatureMachine = createMachine<FeatureContext, FeatureAction, FeatureTypeState>({
+export const FeatureMachine = createMachine<
+  FeatureContext,
+  FeatureAction,
+  FeatureTypeState
+>({
   id: 'feature',
   initial: 'initial',
   context: {},
   predictableActionArguments: true,
   on: {
     ENABLE: [
-      { target: 'asyncEnabled', cond: (ctx) => ctx.featureDesc?.onChangeDefault != null },
+      {
+        target: 'asyncEnabled',
+        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
+      },
       { target: 'enabled' },
     ],
 
     TOGGLE: [
-      { target: 'asyncEnabled', cond: (ctx) => ctx.featureDesc?.onChangeDefault != null },
+      {
+        target: 'asyncEnabled',
+        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
+      },
       { target: 'enabled' },
     ],
 
     DISABLE: [
-      { target: 'asyncDisabled', cond: (ctx) => ctx.featureDesc?.onChangeDefault != null },
+      {
+        target: 'asyncDisabled',
+        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
+      },
       { target: 'disabled' },
     ],
 
     UNSET: [
-      { target: 'asyncUnspecied', cond: (ctx) => ctx.featureDesc?.onChangeDefault != null },
+      {
+        target: 'asyncUnspecied',
+        cond: (ctx) => ctx.featureDesc?.onChangeDefault != null,
+      },
       { target: 'unspecified' },
     ],
 
     SET: [
       {
         target: 'asyncEnabled',
-        cond: (ctx, e) => e.value === true && ctx.featureDesc?.onChangeDefault != null,
+        cond: (ctx, e) =>
+          e.value === true && ctx.featureDesc?.onChangeDefault != null,
       },
       {
         target: 'asyncDisabled',
-        cond: (ctx, e) => e.value === false && ctx.featureDesc?.onChangeDefault != null,
+        cond: (ctx, e) =>
+          e.value === false && ctx.featureDesc?.onChangeDefault != null,
       },
       {
         target: 'asyncUnspecied',

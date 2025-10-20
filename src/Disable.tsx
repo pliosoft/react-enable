@@ -1,8 +1,9 @@
-import * as React from "react";
+// biome-ignore lint/style/useImportType: JSX requires React at runtime
+import * as React from 'react';
 
-import { EnableProps } from "./Enable";
-import { useAllDisabled } from "./useAllDisabled";
-import { useDisabled } from "./useDisabled";
+import type { EnableProps } from './Enable';
+import { useAllDisabled } from './useAllDisabled';
+import { useDisabled } from './useDisabled';
 
 /**
  * Feature will be disabled if any in the list are enabled
@@ -10,7 +11,7 @@ import { useDisabled } from "./useDisabled";
 export const Disable: React.FC<EnableProps> = ({
   feature = [],
   allFeatures = [],
-  children
+  children,
 }) => {
   const isAny = useDisabled(feature);
   const isAll = useAllDisabled(allFeatures);

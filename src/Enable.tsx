@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useImportType: JSX requires React at runtime
 import * as React from 'react';
 
 import { useAllEnabled } from './useAllEnabled';
@@ -12,7 +13,11 @@ export interface EnableProps {
 /**
  * Feature will be enabled if any feature in the list are enabled,
  */
-export function Enable({ feature = [], allFeatures = [], children }: EnableProps): JSX.Element | null {
+export function Enable({
+  feature = [],
+  allFeatures = [],
+  children,
+}: EnableProps): JSX.Element | null {
   const isAny = useEnabled(feature);
   const isAll = useAllEnabled(allFeatures);
 

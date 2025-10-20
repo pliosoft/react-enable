@@ -1,7 +1,6 @@
 import { createContext } from 'react';
-
-import { FeaturesDispatch, FeaturesState } from './FeaturesState';
-import { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeatureDescription, FeatureValue } from './FeatureState';
+import type { FeaturesDispatch, FeaturesState } from './FeaturesState';
 
 export const FeatureContext = createContext<FeatureContextType | null>(null);
 

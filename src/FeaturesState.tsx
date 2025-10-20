@@ -1,6 +1,18 @@
-import { ActorRefFrom, InterpreterFrom, StateFrom, assign, createMachine, spawn } from 'xstate';
+import {
+  type ActorRefFrom,
+  type InterpreterFrom,
+  type StateFrom,
+  assign,
+  createMachine,
+  spawn,
+} from 'xstate';
 
-import { FeatureMachine, FeatureDescription, FeatureValue, valueForState } from './FeatureState';
+import {
+  type FeatureDescription,
+  FeatureMachine,
+  type FeatureValue,
+  valueForState,
+} from './FeatureState';
 
 export interface FeaturesContext {
   // features are layered:
@@ -29,7 +41,10 @@ export interface FeaturesTypeState {
 export type FeaturesState = StateFrom<typeof FeaturesMachine>;
 export type FeaturesDispatch = InterpreterFrom<typeof FeaturesMachine>['send'];
 
-export function valueOfFeature(featuresState: FeaturesState, feature: string): [FeatureValue, boolean] {
+export function valueOfFeature(
+  featuresState: FeaturesState,
+  feature: string,
+): [FeatureValue, boolean] {
   if (featuresState.context.features[feature] == null) {
     return [undefined, false];
   }
@@ -41,7 +56,11 @@ export function valueOfFeature(featuresState: FeaturesState, feature: string): [
 }
 
 /// state machine that manages a set of features with user, org, and local overrides
-export const FeaturesMachine = createMachine<FeaturesContext, FeaturesAction, FeaturesTypeState>({
+export const FeaturesMachine = createMachine<
+  FeaturesContext,
+  FeaturesAction,
+  FeaturesTypeState
+>({
   id: 'features',
   initial: 'idle',
   predictableActionArguments: true,
@@ -75,14 +94,20 @@ export const FeaturesMachine = createMachine<FeaturesContext, FeaturesAction, Fe
     // the features are loaded and ready to be used
     ready: {
       on: {
-        DE_INIT: { target: 'idle', actions: assign({ features: (_, __) => ({}) }) },
+        DE_INIT: {
+          target: 'idle',
+          actions: assign({ features: (_, __) => ({}) }),
+        },
         SET_ALL: {
           actions: assign({
             features: (ctx, e) => {
               const features = { ...ctx.features };
               // All configured features are set to on/off or undefined
               Object.keys(features).forEach((name) => {
-                features[name].send({ type: 'SET', value: e.features[name] ?? undefined });
+                features[name].send({
+                  type: 'SET',
+                  value: e.features[name] ?? undefined,
+                });
               });
               return features;
             },

@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { FeatureValue } from './FeatureState';
+import type { FeatureValue } from './FeatureState';
 
 export type EnableContextType = (feature: string) => FeatureValue;
 

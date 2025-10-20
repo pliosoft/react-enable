@@ -1,10 +1,14 @@
+import { act, renderHook } from '@testing-library/react-hooks';
 import * as React from 'react';
-
-import { renderHook, act } from '@testing-library/react-hooks';
 
 import { FeatureContext } from './FeatureContext';
 import { Features } from './Features';
-import { useEnabled, useDisabled, useAllEnabled, useAllDisabled } from './index';
+import {
+  useAllDisabled,
+  useAllEnabled,
+  useDisabled,
+  useEnabled,
+} from './index';
 
 class LocalStorageMock {
   store: Record<string, string>;
@@ -97,10 +101,13 @@ describe('Basic Features', () => {
   });
 
   it('feature should be disabled by default', () => {
-    const { result: r1, unmount: u1 } = renderHook(() => useEnabled('Feature 1'), {
-      wrapper: Features,
-      initialProps: { features: featuresA },
-    });
+    const { result: r1, unmount: u1 } = renderHook(
+      () => useEnabled('Feature 1'),
+      {
+        wrapper: Features,
+        initialProps: { features: featuresA },
+      },
+    );
     u1();
     const { result: r2 } = renderHook(() => useDisabled('Feature 1'), {
       wrapper: Features,
@@ -113,15 +120,21 @@ describe('Basic Features', () => {
   });
 
   it('default-enabled should be enabled by default', () => {
-    const { result: r1, unmount: u1 } = renderHook(() => useEnabled('Default Enabled'), {
-      wrapper: Features,
-      initialProps: { features: featuresB },
-    });
+    const { result: r1, unmount: u1 } = renderHook(
+      () => useEnabled('Default Enabled'),
+      {
+        wrapper: Features,
+        initialProps: { features: featuresB },
+      },
+    );
     u1();
-    const { result: r2, unmount: u2 } = renderHook(() => useDisabled('Default Enabled'), {
-      wrapper: Features,
-      initialProps: { features: featuresB },
-    });
+    const { result: r2, unmount: u2 } = renderHook(
+      () => useDisabled('Default Enabled'),
+      {
+        wrapper: Features,
+        initialProps: { features: featuresB },
+      },
+    );
     expect(r1.current).toBe(true);
     expect(r2.current).toBe(false);
     u2();
@@ -138,7 +151,10 @@ describe('Basic Features', () => {
         const x = React.useContext(FeatureContext);
         return { f1, f2, f3, g: x?.overridesSend };
       },
-      { wrapper: Features, initialProps: { features: featuresA, storage: storage } }
+      {
+        wrapper: Features,
+        initialProps: { features: featuresA, storage: storage },
+      },
     );
 
     expect(r1.current.f1).toBe(false);
@@ -167,14 +183,17 @@ describe('Basic Features', () => {
         const x = React.useContext(FeatureContext);
         return { f1, f2, f3, g: x?.overridesSend };
       },
-      { wrapper: Features, initialProps: { features: featuresA, storage: storage } }
+      {
+        wrapper: Features,
+        initialProps: { features: featuresA, storage: storage },
+      },
     );
 
     expect(r2.current.f1).toBe(r1.current.f1);
     expect(r2.current.f2).toBe(r1.current.f2);
     expect(r2.current.f3).toBe(r1.current.f3);
     expect(storage.getItem('react-enable:feature-values')).toEqual(
-      '{"overrides":{"Feature 1":true,"Feature 2":true,"Feature 3":true}}'
+      '{"overrides":{"Feature 1":true,"Feature 2":true,"Feature 3":true}}',
     );
     u2();
   });
@@ -186,7 +205,7 @@ describe('Basic Features', () => {
         const f2 = useAllDisabled([]);
         return { f1, f2 };
       },
-      { wrapper: Features, initialProps: { features: featuresA } }
+      { wrapper: Features, initialProps: { features: featuresA } },
     );
 
     expect(result.current.f1).toBe(false);
@@ -203,7 +222,7 @@ describe('Basic Features', () => {
         const x = React.useContext(FeatureContext);
         return { f1, f2, f3, g: x?.overridesSend };
       },
-      { wrapper: Features, initialProps: { features: featuresA } }
+      { wrapper: Features, initialProps: { features: featuresA } },
     );
 
     expect(result.current.f3).toBe(false);
@@ -229,7 +248,7 @@ describe('Basic Features', () => {
         const x = React.useContext(FeatureContext);
         return { f1, f2, f3, g: x?.overridesSend };
       },
-      { wrapper: Features, initialProps: { features: featuresB } }
+      { wrapper: Features, initialProps: { features: featuresB } },
     );
 
     expect(result.current.f1).toBe(true);
