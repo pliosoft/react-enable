@@ -43,6 +43,20 @@ describe('Integration Tests - Public API', () => {
     { name: 'Feature3', description: 'Test Feature 3', defaultValue: false },
   ];
 
+  beforeEach(() => {
+    // Clear sessionStorage before each test to prevent state leakage
+    window.sessionStorage.clear();
+  });
+
+  afterEach(() => {
+    // Clean up sessionStorage after each test
+    window.sessionStorage.clear();
+    // Clear window.feature if it was set
+    if (window.feature !== undefined) {
+      window.feature = undefined;
+    }
+  });
+
   describe('useEnabled and useDisabled', () => {
     it('should handle arrays of features correctly', () => {
       const { result } = renderHook(
@@ -399,41 +413,31 @@ describe('Integration Tests - Public API', () => {
   });
 
   describe('console override integration', () => {
-    beforeEach(() => {
-      if (window.feature !== undefined) {
-        window.feature = undefined;
-      }
-    });
-
-    afterEach(() => {
-      if (window.feature !== undefined) {
-        window.feature = undefined;
-      }
-    });
-
-    it('should expose window.feature when consoleOverride is true', () => {
-      renderHook(() => useEnabled('Feature1'), {
+    it('should expose window.feature when disableConsole is false (default)', () => {
+      const { unmount } = renderHook(() => useEnabled('Feature1'), {
         wrapper: Features,
-        initialProps: { features: baseFeatures, consoleOverride: true },
+        initialProps: { features: baseFeatures, disableConsole: false },
       });
 
       expect(window.feature).toBeDefined();
       expect(window.feature?.listFeatures).toBeDefined();
+      unmount();
     });
 
-    it('should not expose window.feature when consoleOverride is false', () => {
-      renderHook(() => useEnabled('Feature1'), {
+    it('should not expose window.feature when disableConsole is true', () => {
+      const { unmount } = renderHook(() => useEnabled('Feature1'), {
         wrapper: Features,
-        initialProps: { features: baseFeatures, consoleOverride: false },
+        initialProps: { features: baseFeatures, disableConsole: true },
       });
 
       expect(window.feature).toBeUndefined();
+      unmount();
     });
 
     it('should allow enabling features via window.feature', () => {
-      const { result } = renderHook(() => useEnabled('Feature1'), {
+      const { result, unmount } = renderHook(() => useEnabled('Feature1'), {
         wrapper: Features,
-        initialProps: { features: baseFeatures, consoleOverride: true },
+        initialProps: { features: baseFeatures, disableConsole: false },
       });
 
       expect(result.current).toBe(false);
@@ -443,12 +447,13 @@ describe('Integration Tests - Public API', () => {
       });
 
       expect(result.current).toBe(true);
+      unmount();
     });
 
     it('should allow disabling features via window.feature', () => {
-      const { result } = renderHook(() => useEnabled('Feature2'), {
+      const { result, unmount } = renderHook(() => useEnabled('Feature2'), {
         wrapper: Features,
-        initialProps: { features: baseFeatures, consoleOverride: true },
+        initialProps: { features: baseFeatures, disableConsole: false },
       });
 
       expect(result.current).toBe(true);
@@ -458,12 +463,13 @@ describe('Integration Tests - Public API', () => {
       });
 
       expect(result.current).toBe(false);
+      unmount();
     });
 
     it('should allow toggling features via window.feature', () => {
-      const { result } = renderHook(() => useEnabled('Feature1'), {
+      const { result, unmount } = renderHook(() => useEnabled('Feature1'), {
         wrapper: Features,
-        initialProps: { features: baseFeatures, consoleOverride: true },
+        initialProps: { features: baseFeatures, disableConsole: false },
       });
 
       expect(result.current).toBe(false);
@@ -473,12 +479,13 @@ describe('Integration Tests - Public API', () => {
       });
 
       expect(result.current).toBe(true);
+      unmount();
     });
 
     it('should list all features via window.feature', () => {
-      renderHook(() => useEnabled('Feature1'), {
+      const { unmount } = renderHook(() => useEnabled('Feature1'), {
         wrapper: Features,
-        initialProps: { features: baseFeatures, consoleOverride: true },
+        initialProps: { features: baseFeatures, disableConsole: false },
       });
 
       const features = window.feature?.listFeatures();
@@ -488,6 +495,7 @@ describe('Integration Tests - Public API', () => {
         'Feature2',
         'Feature3',
       ]);
+      unmount();
     });
   });
 

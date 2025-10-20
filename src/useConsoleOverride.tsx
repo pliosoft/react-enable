@@ -11,8 +11,14 @@ export default function useConsoleOverride(
 ): void {
   useEffect(() => {
     if (!consoleOverride) {
+      // Clean up window.feature immediately if consoleOverride is disabled
+      if (window.feature != null) {
+        window.feature = undefined;
+      }
       return () => {
-        /* empty */
+        if (window.feature != null) {
+          window.feature = undefined;
+        }
       };
     }
     window.feature = new GlobalEnable(dispatch, testFeature, features);

@@ -177,7 +177,7 @@ describe('ToggleFeatureUnwrapped', () => {
 
   describe('feature options', () => {
     it('should display all three options for each feature', () => {
-      const { getByText } = render(
+      const { getByText, getAllByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
         </Features>,
@@ -185,25 +185,25 @@ describe('ToggleFeatureUnwrapped', () => {
 
       expect(getByText('Enable Feature1')).toBeInTheDocument();
       expect(getByText('Disable Feature1')).toBeInTheDocument();
-      expect(getByText('Default')).toBeInTheDocument();
+      // There should be one "Default" option for each feature
+      expect(getAllByText('Default')).toHaveLength(3);
     });
 
     it('should show descriptions for each option', () => {
-      const { getByText } = render(
+      const { getAllByText } = render(
         <Features features={mockFeatures}>
           <ToggleFeatureUnwrapped defaultOpen={true} />
         </Features>,
       );
 
-      expect(
-        getByText('Override the feature to be enabled'),
-      ).toBeInTheDocument();
-      expect(
-        getByText('Override the feature to be disabled'),
-      ).toBeInTheDocument();
-      expect(
-        getByText('Inherit enabled state from defaults'),
-      ).toBeInTheDocument();
+      // There should be one of each description per feature (3 features)
+      expect(getAllByText('Override the feature to be enabled')).toHaveLength(3);
+      expect(getAllByText('Override the feature to be disabled')).toHaveLength(
+        3,
+      );
+      expect(getAllByText('Inherit enabled state from defaults')).toHaveLength(
+        3,
+      );
     });
   });
 
@@ -225,7 +225,10 @@ describe('ToggleFeatureUnwrapped', () => {
       expect(getByText('NoDescFeature')).toBeInTheDocument();
       // Description element should not be rendered
       const featureSection = screen.getByText('NoDescFeature').closest('h6');
-      expect(featureSection?.nextSibling).not.toHaveClass('text-gray-500');
+      const nextSibling = featureSection?.nextSibling as HTMLElement | null;
+      if (nextSibling) {
+        expect(nextSibling).not.toHaveClass('text-gray-500');
+      }
     });
   });
 
