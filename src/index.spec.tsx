@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import * as React from 'react';
 
 import { FeatureContext } from './FeatureContext';
@@ -119,7 +119,7 @@ describe('Basic Features', () => {
     expect(r2.current).toBe(true);
   });
 
-  it('default-enabled should be enabled by default', () => {
+  it('default-enabled should be enabled by default', async () => {
     const { result: r1, unmount: u1 } = renderHook(
       () => useEnabled('Default Enabled'),
       {
@@ -127,6 +127,7 @@ describe('Basic Features', () => {
         initialProps: { features: featuresB },
       },
     );
+    await waitFor(() => expect(r1.current).toBe(true));
     u1();
     const { result: r2, unmount: u2 } = renderHook(
       () => useDisabled('Default Enabled'),
@@ -135,12 +136,11 @@ describe('Basic Features', () => {
         initialProps: { features: featuresB },
       },
     );
-    expect(r1.current).toBe(true);
-    expect(r2.current).toBe(false);
+    await waitFor(() => expect(r2.current).toBe(false));
     u2();
   });
 
-  it('changes are persisted', () => {
+  it('changes are persisted', async () => {
     const storage = new LocalStorageMock();
 
     const { result: r1, unmount: u1 } = renderHook(
@@ -157,9 +157,11 @@ describe('Basic Features', () => {
       },
     );
 
-    expect(r1.current.f1).toBe(false);
-    expect(r1.current.f2).toBe(true);
-    expect(r1.current.f3).toBe(false);
+    await waitFor(() => {
+      expect(r1.current.f1).toBe(false);
+      expect(r1.current.f2).toBe(true);
+      expect(r1.current.f3).toBe(false);
+    });
 
     act(() => {
       if (r1.current.g != null) {
@@ -169,9 +171,11 @@ describe('Basic Features', () => {
       }
     });
 
-    expect(r1.current.f1).toBe(true);
-    expect(r1.current.f2).toBe(false);
-    expect(r1.current.f3).toBe(true);
+    await waitFor(() => {
+      expect(r1.current.f1).toBe(true);
+      expect(r1.current.f2).toBe(false);
+      expect(r1.current.f3).toBe(true);
+    });
 
     u1();
 
