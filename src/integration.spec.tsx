@@ -58,28 +58,50 @@ describe('Integration Tests - Public API', () => {
   });
 
   describe('useEnabled and useDisabled', () => {
-    it('should handle arrays of features correctly', () => {
-      const { result } = renderHook(
-        () => ({
-          anyEnabled: useEnabled(['Feature1', 'Feature2']),
-          anyDisabled: useDisabled(['Feature1', 'Feature2']),
-        }),
-        { wrapper: Features, initialProps: { features: baseFeatures } },
+    it('should handle arrays of features correctly', async () => {
+      const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+        <Features features={baseFeatures}>{children}</Features>
       );
+
+      const { result } = renderHook(
+        () => {
+          const context = React.useContext(FeatureContext);
+          return {
+            anyEnabled: useEnabled(['Feature1', 'Feature2']),
+            anyDisabled: useDisabled(['Feature1', 'Feature2']),
+            defaultsState: context?.defaultsState,
+          };
+        },
+        { wrapper: Wrapper },
+      );
+
+      // Wait for initialization
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
 
       expect(result.current.anyEnabled).toBe(true); // Feature2 is enabled
       expect(result.current.anyDisabled).toBe(true); // Feature1 is disabled
     });
 
-    it('should update when features are toggled', () => {
+    it('should update when features are toggled', async () => {
+      const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+        <Features features={baseFeatures}>{children}</Features>
+      );
+
       const { result, unmount } = renderHook(
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend };
+          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } },
+        { wrapper: Wrapper },
       );
+
+      // Wait for initialization
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
 
       expect(result.current.enabled).toBe(false);
 
@@ -87,7 +109,9 @@ describe('Integration Tests - Public API', () => {
         result.current.dispatch?.({ type: 'TOGGLE', name: 'Feature1' });
       });
 
-      expect(result.current.enabled).toBe(true);
+      await waitFor(() => {
+        expect(result.current.enabled).toBe(true);
+      });
       unmount();
     });
 

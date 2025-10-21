@@ -120,28 +120,37 @@ describe('Basic Features', () => {
   });
 
   it('default-enabled should be enabled by default', async () => {
-    const { result: r1, unmount: u1 } = renderHook(
-      () => useEnabled('Default Enabled'),
-      {
-        wrapper: Features,
-        initialProps: { features: featuresB },
-      },
+    const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+      <Features features={featuresB}>{children}</Features>
     );
-    await waitFor(() => expect(r1.current).toBe(true));
-    u1();
-    const { result: r2, unmount: u2 } = renderHook(
-      () => useDisabled('Default Enabled'),
-      {
-        wrapper: Features,
-        initialProps: { features: featuresB },
+
+    const { result } = renderHook(
+      () => {
+        const enabled = useEnabled('Default Enabled');
+        const context = React.useContext(FeatureContext);
+        return {
+          enabled,
+          defaultsState: context?.defaultsState,
+        };
       },
+      { wrapper: Wrapper },
     );
-    await waitFor(() => expect(r2.current).toBe(false));
-    u2();
+
+    // Wait for the states to be initialized (from 'idle' to 'ready')
+    await waitFor(() => {
+      expect(result.current.defaultsState?.value).toBe('ready');
+    });
+
+    // Now check the actual value
+    expect(result.current.enabled).toBe(true);
   });
 
   it('changes are persisted', async () => {
     const storage = new LocalStorageMock();
+
+    const Wrapper1 = ({ children }: { children?: React.ReactNode }) => (
+      <Features features={featuresA} storage={storage}>{children}</Features>
+    );
 
     const { result: r1, unmount: u1 } = renderHook(
       () => {
@@ -149,13 +158,15 @@ describe('Basic Features', () => {
         const f2 = useDisabled('Feature 2');
         const f3 = useEnabled('Feature 3');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend };
+        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
       },
-      {
-        wrapper: Features,
-        initialProps: { features: featuresA, storage: storage },
-      },
+      { wrapper: Wrapper1 },
     );
+
+    // Wait for initialization
+    await waitFor(() => {
+      expect(r1.current.defaultsState?.value).toBe('ready');
+    });
 
     await waitFor(() => {
       expect(r1.current.f1).toBe(false);
@@ -179,23 +190,31 @@ describe('Basic Features', () => {
 
     u1();
 
+    const Wrapper2 = ({ children }: { children?: React.ReactNode }) => (
+      <Features features={featuresA} storage={storage}>{children}</Features>
+    );
+
     const { result: r2, unmount: u2 } = renderHook(
       () => {
         const f1 = useEnabled('Feature 1');
         const f2 = useDisabled('Feature 2');
         const f3 = useEnabled('Feature 3');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend };
+        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
       },
-      {
-        wrapper: Features,
-        initialProps: { features: featuresA, storage: storage },
-      },
+      { wrapper: Wrapper2 },
     );
 
-    expect(r2.current.f1).toBe(r1.current.f1);
-    expect(r2.current.f2).toBe(r1.current.f2);
-    expect(r2.current.f3).toBe(r1.current.f3);
+    // Wait for initialization
+    await waitFor(() => {
+      expect(r2.current.defaultsState?.value).toBe('ready');
+    });
+
+    await waitFor(() => {
+      expect(r2.current.f1).toBe(r1.current.f1);
+      expect(r2.current.f2).toBe(r1.current.f2);
+      expect(r2.current.f3).toBe(r1.current.f3);
+    });
     expect(storage.getItem('react-enable:feature-values')).toEqual(
       '{"overrides":{"Feature 1":true,"Feature 2":true,"Feature 3":true}}',
     );
@@ -217,17 +236,26 @@ describe('Basic Features', () => {
     unmount();
   });
 
-  it('feature should be enabled after enabling', () => {
+  it('feature should be enabled after enabling', async () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+      <Features features={featuresA}>{children}</Features>
+    );
+
     const { result, unmount } = renderHook(
       () => {
         const f1 = useEnabled('Feature 1');
         const f2 = useDisabled('Feature 1');
         const f3 = useEnabled('Feature 2');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend };
+        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
       },
-      { wrapper: Features, initialProps: { features: featuresA } },
+      { wrapper: Wrapper },
     );
+
+    // Wait for initialization
+    await waitFor(() => {
+      expect(result.current.defaultsState?.value).toBe('ready');
+    });
 
     expect(result.current.f3).toBe(false);
 
@@ -237,35 +265,49 @@ describe('Basic Features', () => {
       }
     });
 
-    expect(result.current.f1).toBe(true);
-    expect(result.current.f2).toBe(false);
-    expect(result.current.f3).toBe(false);
+    await waitFor(() => {
+      expect(result.current.f1).toBe(true);
+      expect(result.current.f2).toBe(false);
+      expect(result.current.f3).toBe(false);
+    });
     unmount();
   });
 
-  it('default-enabled should be possible to disable', () => {
+  it('default-enabled should be possible to disable', async () => {
+    const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+      <Features features={featuresB}>{children}</Features>
+    );
+
     const { result } = renderHook(
       () => {
         const f1 = useEnabled('Default Enabled');
         const f2 = useDisabled('Default Enabled');
         const f3 = useEnabled('Feature 2');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend };
+        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
       },
-      { wrapper: Features, initialProps: { features: featuresB } },
+      { wrapper: Wrapper },
     );
+
+    // Wait for initialization
+    await waitFor(() => {
+      expect(result.current.defaultsState?.value).toBe('ready');
+    });
 
     expect(result.current.f1).toBe(true);
     expect(result.current.f2).toBe(false);
     expect(result.current.f3).toBe(false);
+
     act(() => {
       if (result.current.g != null) {
         result.current.g({ type: 'DISABLE', name: 'Default Enabled' });
       }
     });
 
-    expect(result.current.f1).toBe(false);
-    expect(result.current.f2).toBe(true);
-    expect(result.current.f3).toBe(false);
+    await waitFor(() => {
+      expect(result.current.f1).toBe(false);
+      expect(result.current.f2).toBe(true);
+      expect(result.current.f3).toBe(false);
+    });
   });
 });
