@@ -93,7 +93,11 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
@@ -124,23 +128,33 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.enabled).toBe(false);
 
       act(() => {
         result.current.dispatch?.({ type: 'ENABLE', name: 'Feature1' });
       });
-      await waitFor(() => { expect(result.current.enabled).toBe(true); });
+      await waitFor(() => {
+        expect(result.current.enabled).toBe(true);
+      });
 
       act(() => {
         result.current.dispatch?.({ type: 'DISABLE', name: 'Feature1' });
       });
-      await waitFor(() => { expect(result.current.enabled).toBe(false); });
+      await waitFor(() => {
+        expect(result.current.enabled).toBe(false);
+      });
       unmount();
     });
   });
@@ -160,7 +174,9 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.res).toBe(true); // Feature2 is enabled
     });
 
@@ -173,12 +189,18 @@ describe('Integration Tests - Public API', () => {
         () => {
           const allEnabled = useAllEnabled(['Feature1', 'Feature2']);
           const context = React.useContext(FeatureContext);
-          return { allEnabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            allEnabled,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.allEnabled).toBe(false);
 
       act(() => {
@@ -216,12 +238,19 @@ describe('Integration Tests - Public API', () => {
           const forcedOn = useEnabled('ForcedOn');
           const forcedOff = useDisabled('ForcedOff');
           const context = React.useContext(FeatureContext);
-          return { forcedOn, forcedOff, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            forcedOn,
+            forcedOff,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.forcedOn).toBe(true);
       expect(result.current.forcedOff).toBe(true);
 
@@ -256,12 +285,18 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('NoOverride');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.enabled).toBe(true);
 
       // UI should respect noOverride, but the state machine will still accept the action
@@ -280,31 +315,43 @@ describe('Integration Tests - Public API', () => {
       const storage = new LocalStorageMock();
 
       const Wrapper1 = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} storage={storage}>{children}</Features>
+        <Features features={baseFeatures} storage={storage}>
+          {children}
+        </Features>
       );
 
       const { result: firstResult, unmount } = renderHook(
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper1 },
       );
 
-      await waitFor(() => { expect(firstResult.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(firstResult.current.defaultsState?.value).toBe('ready');
+      });
       expect(firstResult.current.enabled).toBe(false);
 
       act(() => {
         firstResult.current.dispatch?.({ type: 'ENABLE', name: 'Feature1' });
       });
 
-      await waitFor(() => { expect(firstResult.current.enabled).toBe(true); });
+      await waitFor(() => {
+        expect(firstResult.current.enabled).toBe(true);
+      });
       unmount();
 
       // Create new instance with same storage
       const Wrapper2 = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} storage={storage}>{children}</Features>
+        <Features features={baseFeatures} storage={storage}>
+          {children}
+        </Features>
       );
 
       const { result: secondResult } = renderHook(
@@ -316,7 +363,9 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper2 },
       );
 
-      await waitFor(() => { expect(secondResult.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(secondResult.current.defaultsState?.value).toBe('ready');
+      });
       expect(secondResult.current.res).toBe(true);
     });
 
@@ -331,12 +380,20 @@ describe('Integration Tests - Public API', () => {
           const f2 = useEnabled('Feature2');
           const f3 = useEnabled('Feature3');
           const context = React.useContext(FeatureContext);
-          return { f1, f2, f3, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            f1,
+            f2,
+            f3,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.f1).toBe(false);
       expect(result.current.f2).toBe(true);
       expect(result.current.f3).toBe(false);
@@ -364,23 +421,33 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.enabled).toBe(false);
 
       act(() => {
         result.current.dispatch?.({ type: 'ENABLE', name: 'Feature1' });
       });
-      await waitFor(() => { expect(result.current.enabled).toBe(true); });
+      await waitFor(() => {
+        expect(result.current.enabled).toBe(true);
+      });
 
       act(() => {
         result.current.dispatch?.({ type: 'UNSET', name: 'Feature1' });
       });
-      await waitFor(() => { expect(result.current.enabled).toBe(false); }); // Back to default
+      await waitFor(() => {
+        expect(result.current.enabled).toBe(false);
+      }); // Back to default
     });
   });
 
@@ -404,12 +471,18 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('AsyncFeature');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.defaultsSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.defaultsSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.enabled).toBe(false);
 
       act(() => {
@@ -443,12 +516,18 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('AsyncFeature');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.defaultsSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.defaultsSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.enabled).toBe(false);
 
       act(() => {
@@ -481,12 +560,18 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('AsyncFeature');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.defaultsSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.defaultsSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.enabled).toBe(false);
 
       act(() => {
@@ -504,7 +589,9 @@ describe('Integration Tests - Public API', () => {
   describe('console override integration', () => {
     it('should expose window.feature when disableConsole is false (default)', async () => {
       const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} disableConsole={false}>{children}</Features>
+        <Features features={baseFeatures} disableConsole={false}>
+          {children}
+        </Features>
       );
 
       const { result, unmount } = renderHook(
@@ -516,7 +603,9 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(window.feature).toBeDefined();
       expect(window.feature?.listFeatures).toBeDefined();
       unmount();
@@ -524,7 +613,9 @@ describe('Integration Tests - Public API', () => {
 
     it('should not expose window.feature when disableConsole is true', async () => {
       const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} disableConsole={true}>{children}</Features>
+        <Features features={baseFeatures} disableConsole={true}>
+          {children}
+        </Features>
       );
 
       const { result, unmount } = renderHook(
@@ -536,14 +627,18 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(window.feature).toBeUndefined();
       unmount();
     });
 
     it('should allow enabling features via window.feature', async () => {
       const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} disableConsole={false}>{children}</Features>
+        <Features features={baseFeatures} disableConsole={false}>
+          {children}
+        </Features>
       );
 
       const { result, unmount } = renderHook(
@@ -555,20 +650,26 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.res).toBe(false);
 
       act(() => {
         window.feature?.enable('Feature1');
       });
 
-      await waitFor(() => { expect(result.current.res).toBe(true); });
+      await waitFor(() => {
+        expect(result.current.res).toBe(true);
+      });
       unmount();
     });
 
     it('should allow disabling features via window.feature', async () => {
       const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} disableConsole={false}>{children}</Features>
+        <Features features={baseFeatures} disableConsole={false}>
+          {children}
+        </Features>
       );
 
       const { result, unmount } = renderHook(
@@ -580,20 +681,26 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.res).toBe(true);
 
       act(() => {
         window.feature?.disable('Feature2');
       });
 
-      await waitFor(() => { expect(result.current.res).toBe(false); });
+      await waitFor(() => {
+        expect(result.current.res).toBe(false);
+      });
       unmount();
     });
 
     it('should allow toggling features via window.feature', async () => {
       const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} disableConsole={false}>{children}</Features>
+        <Features features={baseFeatures} disableConsole={false}>
+          {children}
+        </Features>
       );
 
       const { result, unmount } = renderHook(
@@ -605,20 +712,26 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       expect(result.current.res).toBe(false);
 
       act(() => {
         window.feature?.toggle('Feature1');
       });
 
-      await waitFor(() => { expect(result.current.res).toBe(true); });
+      await waitFor(() => {
+        expect(result.current.res).toBe(true);
+      });
       unmount();
     });
 
     it('should list all features via window.feature', async () => {
       const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-        <Features features={baseFeatures} disableConsole={false}>{children}</Features>
+        <Features features={baseFeatures} disableConsole={false}>
+          {children}
+        </Features>
       );
 
       const { result, unmount } = renderHook(
@@ -630,7 +743,9 @@ describe('Integration Tests - Public API', () => {
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
       const features = window.feature?.listFeatures();
       expect(features).toHaveLength(3);
       expect(features?.map((f) => f[0])).toEqual([
@@ -670,12 +785,18 @@ describe('Integration Tests - Public API', () => {
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
+          return {
+            enabled,
+            dispatch: context?.overridesSend,
+            defaultsState: context?.defaultsState,
+          };
         },
         { wrapper: Wrapper },
       );
 
-      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      await waitFor(() => {
+        expect(result.current.defaultsState?.value).toBe('ready');
+      });
 
       act(() => {
         result.current.dispatch?.({ type: 'ENABLE', name: 'Feature1' });
@@ -685,7 +806,9 @@ describe('Integration Tests - Public API', () => {
       });
 
       // Final state should reflect the last action
-      await waitFor(() => { expect(result.current.enabled).toBe(true); });
+      await waitFor(() => {
+        expect(result.current.enabled).toBe(true);
+      });
     });
   });
 });

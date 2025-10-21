@@ -149,7 +149,9 @@ describe('Basic Features', () => {
     const storage = new LocalStorageMock();
 
     const Wrapper1 = ({ children }: { children?: React.ReactNode }) => (
-      <Features features={featuresA} storage={storage}>{children}</Features>
+      <Features features={featuresA} storage={storage}>
+        {children}
+      </Features>
     );
 
     const { result: r1, unmount: u1 } = renderHook(
@@ -158,7 +160,13 @@ describe('Basic Features', () => {
         const f2 = useDisabled('Feature 2');
         const f3 = useEnabled('Feature 3');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
+        return {
+          f1,
+          f2,
+          f3,
+          g: x?.overridesSend,
+          defaultsState: x?.defaultsState,
+        };
       },
       { wrapper: Wrapper1 },
     );
@@ -191,7 +199,9 @@ describe('Basic Features', () => {
     u1();
 
     const Wrapper2 = ({ children }: { children?: React.ReactNode }) => (
-      <Features features={featuresA} storage={storage}>{children}</Features>
+      <Features features={featuresA} storage={storage}>
+        {children}
+      </Features>
     );
 
     const { result: r2, unmount: u2 } = renderHook(
@@ -200,7 +210,13 @@ describe('Basic Features', () => {
         const f2 = useDisabled('Feature 2');
         const f3 = useEnabled('Feature 3');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
+        return {
+          f1,
+          f2,
+          f3,
+          g: x?.overridesSend,
+          defaultsState: x?.defaultsState,
+        };
       },
       { wrapper: Wrapper2 },
     );
@@ -247,7 +263,13 @@ describe('Basic Features', () => {
         const f2 = useDisabled('Feature 1');
         const f3 = useEnabled('Feature 2');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
+        return {
+          f1,
+          f2,
+          f3,
+          g: x?.overridesSend,
+          defaultsState: x?.defaultsState,
+        };
       },
       { wrapper: Wrapper },
     );
@@ -284,7 +306,13 @@ describe('Basic Features', () => {
         const f2 = useDisabled('Default Enabled');
         const f3 = useEnabled('Feature 2');
         const x = React.useContext(FeatureContext);
-        return { f1, f2, f3, g: x?.overridesSend, defaultsState: x?.defaultsState };
+        return {
+          f1,
+          f2,
+          f3,
+          g: x?.overridesSend,
+          defaultsState: x?.defaultsState,
+        };
       },
       { wrapper: Wrapper },
     );

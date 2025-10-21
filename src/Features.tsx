@@ -1,4 +1,11 @@
-import { type ReactNode, useEffect, useLayoutEffect, useMemo, useReducer, useRef } from 'react';
+import {
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from 'react';
 
 import { EnableContext } from './EnableContext';
 import { FeatureContext } from './FeatureContext';
