@@ -1,6 +1,7 @@
-import React, {
+import {
   type ReactNode,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useRef,
@@ -44,7 +45,7 @@ export function Features({
     initialFeaturesState,
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     /// Load defaults
     defaultsDispatch({ type: 'INIT', features });
     return () => {
@@ -52,7 +53,7 @@ export function Features({
     };
   }, [features]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let f: Record<string, boolean | undefined> = {};
     if (storage != null) {
       try {
@@ -69,7 +70,7 @@ export function Features({
 
     overridesDispatch({
       type: 'INIT',
-      features: featuresRef.current
+      features: (featuresRef.current ?? [])
         .filter((x) => x.noOverride !== true)
         .map((x) => ({
           name: x.name,

@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 // biome-ignore lint/style/useImportType: JSX requires React at runtime
 import * as React from 'react';
 
@@ -7,7 +7,7 @@ import type { FeatureValue } from './FeatureState';
 import { useTestAndConvert } from './utils';
 
 describe('useTestAndConvert', () => {
-  const mockTest = jest.fn((feature: string): FeatureValue => {
+  const mockTest = vi.fn((feature: string): FeatureValue => {
     return feature === 'EnabledFeature';
   });
 
@@ -16,7 +16,7 @@ describe('useTestAndConvert', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('context retrieval', () => {

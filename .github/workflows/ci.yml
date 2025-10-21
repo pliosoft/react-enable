@@ -57,7 +57,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
       - name: Checkout code
@@ -73,7 +73,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm run test:ci -- --ci --coverage --maxWorkers=2
+        run: npm run test:ci -- --coverage
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == '18.x'

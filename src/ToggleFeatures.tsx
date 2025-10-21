@@ -1,10 +1,5 @@
 import { RadioGroup } from '@headlessui/react';
-import React, {
-  type ReactNode,
-  useCallback,
-  useContext,
-  useState,
-} from 'react';
+import { type ReactNode, useCallback, useContext, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { FeatureContext } from './FeatureContext';

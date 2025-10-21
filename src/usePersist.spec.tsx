@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import type { FeatureDescription } from './FeatureState';
 import {
@@ -134,7 +134,7 @@ describe('usePersist', () => {
 
   it('should handle storage setItem errors gracefully', () => {
     const storage = new LocalStorageMock();
-    storage.setItem = jest.fn(() => {
+    storage.setItem = vi.fn(() => {
       throw new Error('Storage quota exceeded');
     });
 
