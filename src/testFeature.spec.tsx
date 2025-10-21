@@ -200,6 +200,159 @@ describe('testFeature', () => {
     });
   });
 
+  describe('percentage-based rollouts', () => {
+    it('should enable feature based on rollout percentage', () => {
+      // Create a feature with 30% rollout
+      const state = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+            enableFor: 0.3,
+          },
+        ],
+      });
+
+      // Test with multiple stable IDs to verify some are enabled
+      const results = [
+        testFeature('RolloutFeature', [state], 'user-1'),
+        testFeature('RolloutFeature', [state], 'user-2'),
+        testFeature('RolloutFeature', [state], 'user-3'),
+        testFeature('RolloutFeature', [state], 'user-4'),
+        testFeature('RolloutFeature', [state], 'user-5'),
+      ];
+
+      // Should have a mix of enabled and disabled
+      const enabledCount = results.filter((r) => r === true).length;
+      expect(enabledCount).toBeGreaterThan(0);
+      expect(enabledCount).toBeLessThan(results.length);
+    });
+
+    it('should be consistent for the same rolloutStableId', () => {
+      const state = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+            enableFor: 0.5,
+          },
+        ],
+      });
+
+      const result1 = testFeature('RolloutFeature', [state], 'stable-id-123');
+      const result2 = testFeature('RolloutFeature', [state], 'stable-id-123');
+      const result3 = testFeature('RolloutFeature', [state], 'stable-id-123');
+
+      expect(result1).toBe(result2);
+      expect(result2).toBe(result3);
+    });
+
+    it('should return undefined when enableFor is set but no rolloutStableId provided', () => {
+      const state = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+            enableFor: 0.5,
+          },
+        ],
+      });
+
+      const result = testFeature('RolloutFeature', [state]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should always enable when enableFor is 1', () => {
+      const state = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+            enableFor: 1.0,
+          },
+        ],
+      });
+
+      // Test with multiple IDs - all should be enabled
+      expect(testFeature('RolloutFeature', [state], 'user-1')).toBe(true);
+      expect(testFeature('RolloutFeature', [state], 'user-2')).toBe(true);
+      expect(testFeature('RolloutFeature', [state], 'user-3')).toBe(true);
+    });
+
+    it('should never enable when enableFor is 0', () => {
+      const state = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+            enableFor: 0,
+          },
+        ],
+      });
+
+      // Test with multiple IDs - none should be enabled
+      expect(testFeature('RolloutFeature', [state], 'user-1')).toBe(false);
+      expect(testFeature('RolloutFeature', [state], 'user-2')).toBe(false);
+      expect(testFeature('RolloutFeature', [state], 'user-3')).toBe(false);
+    });
+
+    it('should prioritize explicit values over rollout percentages', () => {
+      // Create a state with 0% rollout (should be disabled)
+      let state = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+            enableFor: 0,
+          },
+        ],
+      });
+
+      // Explicitly enable it
+      state = setFeatureValue(state, 'RolloutFeature', true);
+
+      // Should be enabled despite 0% rollout
+      const result = testFeature('RolloutFeature', [state], 'user-1');
+      expect(result).toBe(true);
+    });
+
+    it('should work with layered states and rollouts', () => {
+      // Override state (no explicit value)
+      let overrideState = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+          },
+        ],
+      });
+      overrideState = setFeatureValue(overrideState, 'RolloutFeature', undefined);
+
+      // Default state with rollout
+      const defaultState = featuresReducer(initialFeaturesState, {
+        type: 'INIT',
+        features: [
+          {
+            name: 'RolloutFeature',
+            description: 'Test rollout',
+            enableFor: 0.5,
+          },
+        ],
+      });
+
+      // Should fall back to rollout from default state
+      const result = testFeature('RolloutFeature', [overrideState, defaultState], 'user-1');
+      expect(result).toBeDefined();
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle empty states array', () => {
       const result = testFeature('Feature1', []);

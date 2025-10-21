@@ -15,11 +15,18 @@ import useConsoleOverride from './useConsoleOverride';
 import usePersist, { KEY } from './usePersist';
 import useTestCallback from './useTestCallback';
 
+const ROLLOUT_ID_KEY = 'react-enable:rollout-stable-id';
+
 interface FeatureProps {
   readonly features: readonly FeatureDescription[];
   readonly children?: ReactNode;
   readonly disableConsole?: boolean;
   readonly storage?: Storage;
+
+  /// Stable identifier for percentage-based rollouts. If not provided, one will be
+  /// auto-generated and persisted to storage. This ensures consistent feature assignment
+  /// for the same user/session across page loads.
+  readonly rolloutStableId?: string;
 }
 
 /**
@@ -33,9 +40,43 @@ export function Features({
   features,
   disableConsole = false,
   storage = window.sessionStorage,
+  rolloutStableId,
 }: FeatureProps): JSX.Element {
   // Capture only first value; we don't care about future updates
   const featuresRef = useRef(features);
+
+  // Generate or retrieve stable ID for rollouts
+  const stableId = useMemo(() => {
+    if (rolloutStableId != null) {
+      return rolloutStableId;
+    }
+
+    // Try to retrieve existing ID from storage
+    if (storage != null) {
+      try {
+        const existingId = storage.getItem(ROLLOUT_ID_KEY);
+        if (existingId != null) {
+          return existingId;
+        }
+      } catch (e) {
+        // Can't read from storage; generate new ID
+      }
+    }
+
+    // Generate new stable ID
+    const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+    // Persist to storage
+    if (storage != null) {
+      try {
+        storage.setItem(ROLLOUT_ID_KEY, newId);
+      } catch (e) {
+        // Can't persist; ID will still work for this session
+      }
+    }
+
+    return newId;
+  }, [rolloutStableId, storage]);
   const [overridesState, overridesDispatch] = useReducer(
     featuresReducer,
     initialFeaturesState,
@@ -126,7 +167,7 @@ export function Features({
 
   usePersist(storage, featuresRef.current, overridesState);
 
-  const testCallback = useTestCallback(overridesState, defaultsState);
+  const testCallback = useTestCallback(overridesState, defaultsState, stableId);
   useConsoleOverride(
     !disableConsole,
     featuresRef.current,

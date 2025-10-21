@@ -64,6 +64,11 @@ export interface FeatureDescription<K extends string = string> {
 
   /// can be used to specify what should happen if the feature is not set to a particular value.
   readonly defaultValue?: FeatureValue;
+
+  /// Percentage-based rollout (0-1). If set, the feature will be enabled for a percentage of users
+  /// based on a stable identifier. For example, 0.3 means 30% of users will see this feature enabled.
+  /// Requires a rolloutStableId to be provided to the Features component.
+  readonly enableFor?: number;
 }
 
 /**
