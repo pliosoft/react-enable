@@ -13,10 +13,20 @@ Features include:
 
 **Requirements:** Node.js 18.0.0 or higher
 
-To install,
+To install, use your preferred package manager:
 
 ```sh
-npm add --save react-enable react
+# npm
+npm install react-enable react
+
+# yarn
+yarn add react-enable react
+
+# pnpm
+pnpm add react-enable react
+
+# bun
+bun add react-enable react
 ```
 
 Then most users will use it in the following manner:
