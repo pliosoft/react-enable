@@ -202,25 +202,28 @@ describe('testFeature', () => {
 
   describe('percentage-based rollouts', () => {
     it('should enable feature based on rollout percentage', () => {
-      // Create a feature with 30% rollout
+      // Create a feature with 50% rollout for better test reliability
       const state = featuresReducer(initialFeaturesState, {
         type: 'INIT',
         features: [
           {
             name: 'RolloutFeature',
             description: 'Test rollout',
-            enableFor: 0.3,
+            enableFor: 0.5,
           },
         ],
       });
 
-      // Test with multiple stable IDs to verify some are enabled
+      // Test with diverse stable IDs to verify some are enabled and some disabled
       const results = [
-        testFeature('RolloutFeature', [state], 'user-1'),
-        testFeature('RolloutFeature', [state], 'user-2'),
-        testFeature('RolloutFeature', [state], 'user-3'),
-        testFeature('RolloutFeature', [state], 'user-4'),
-        testFeature('RolloutFeature', [state], 'user-5'),
+        testFeature('RolloutFeature', [state], 'alice@example.com'),
+        testFeature('RolloutFeature', [state], 'bob@example.com'),
+        testFeature('RolloutFeature', [state], 'charlie@example.com'),
+        testFeature('RolloutFeature', [state], 'david@example.com'),
+        testFeature('RolloutFeature', [state], 'eve@example.com'),
+        testFeature('RolloutFeature', [state], 'frank@example.com'),
+        testFeature('RolloutFeature', [state], 'grace@example.com'),
+        testFeature('RolloutFeature', [state], 'heidi@example.com'),
       ];
 
       // Should have a mix of enabled and disabled

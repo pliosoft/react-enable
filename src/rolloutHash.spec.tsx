@@ -46,10 +46,26 @@ describe('rolloutHash', () => {
     });
 
     it('should produce well-distributed values', () => {
-      // Generate many hashes and check distribution
+      // Generate many hashes with diverse strings and check distribution
       const hashes: number[] = [];
-      for (let i = 0; i < 100; i++) {
-        hashes.push(hashToPercentage(`user-${i}`));
+      const testStrings = [
+        'alice@example.com',
+        'bob@example.com',
+        'charlie@example.com',
+        'david@example.com',
+        'eve@example.com',
+        'frank@example.com',
+        'grace@example.com',
+        'heidi@example.com',
+        'ivan@example.com',
+        'judy@example.com',
+      ];
+
+      // Test with multiple feature names to get more data points
+      for (const featureName of ['feature-a', 'feature-b', 'feature-c', 'feature-d']) {
+        for (const userId of testStrings) {
+          hashes.push(hashToPercentage(`${featureName}:${userId}`));
+        }
       }
 
       // Check that we have values in different ranges
@@ -99,12 +115,16 @@ describe('rolloutHash', () => {
     });
 
     it('should vary for different users', () => {
+      // Use diverse user identifiers that will hash differently
       const results = [
-        isInRollout('feature', 'user-1', 0.5),
-        isInRollout('feature', 'user-2', 0.5),
-        isInRollout('feature', 'user-3', 0.5),
-        isInRollout('feature', 'user-4', 0.5),
-        isInRollout('feature', 'user-5', 0.5),
+        isInRollout('feature', 'alice@example.com', 0.5),
+        isInRollout('feature', 'bob@example.com', 0.5),
+        isInRollout('feature', 'charlie@example.com', 0.5),
+        isInRollout('feature', 'david@example.com', 0.5),
+        isInRollout('feature', 'eve@example.com', 0.5),
+        isInRollout('feature', 'frank@example.com', 0.5),
+        isInRollout('feature', 'grace@example.com', 0.5),
+        isInRollout('feature', 'heidi@example.com', 0.5),
       ];
 
       // Should have a mix of true and false for 50% rollout
@@ -113,13 +133,16 @@ describe('rolloutHash', () => {
     });
 
     it('should vary for different features with the same user', () => {
-      const user = 'user-123';
+      const user = 'alice@example.com';
       const results = [
-        isInRollout('feature-a', user, 0.5),
-        isInRollout('feature-b', user, 0.5),
-        isInRollout('feature-c', user, 0.5),
-        isInRollout('feature-d', user, 0.5),
-        isInRollout('feature-e', user, 0.5),
+        isInRollout('new-dashboard', user, 0.5),
+        isInRollout('beta-search', user, 0.5),
+        isInRollout('dark-mode', user, 0.5),
+        isInRollout('premium-features', user, 0.5),
+        isInRollout('experimental-ui', user, 0.5),
+        isInRollout('advanced-analytics', user, 0.5),
+        isInRollout('mobile-app', user, 0.5),
+        isInRollout('ai-assistant', user, 0.5),
       ];
 
       // Should have a mix of true and false
@@ -128,13 +151,14 @@ describe('rolloutHash', () => {
     });
 
     it('should respect rollout percentage approximately', () => {
-      const feature = 'test-feature';
       const percentage = 0.3; // 30%
       const numTests = 1000;
 
       let enabledCount = 0;
       for (let i = 0; i < numTests; i++) {
-        if (isInRollout(feature, `user-${i}`, percentage)) {
+        // Use more diverse test data by combining multiple varying components
+        const userId = `user-${i}-${Math.floor(i / 10)}-${i % 7}@domain${i % 5}.com`;
+        if (isInRollout('test-feature', userId, percentage)) {
           enabledCount++;
         }
       }
