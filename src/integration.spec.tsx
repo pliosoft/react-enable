@@ -115,51 +115,70 @@ describe('Integration Tests - Public API', () => {
       unmount();
     });
 
-    it('should handle enable and disable actions', () => {
+    it('should handle enable and disable actions', async () => {
+      const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+        <Features features={baseFeatures}>{children}</Features>
+      );
+
       const { result, unmount } = renderHook(
         () => {
           const enabled = useEnabled('Feature1');
           const context = React.useContext(FeatureContext);
-          return { enabled, dispatch: context?.overridesSend };
+          return { enabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } },
+        { wrapper: Wrapper },
       );
 
+      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
       expect(result.current.enabled).toBe(false);
 
       act(() => {
         result.current.dispatch?.({ type: 'ENABLE', name: 'Feature1' });
       });
-      expect(result.current.enabled).toBe(true);
+      await waitFor(() => { expect(result.current.enabled).toBe(true); });
 
       act(() => {
         result.current.dispatch?.({ type: 'DISABLE', name: 'Feature1' });
       });
-      expect(result.current.enabled).toBe(false);
+      await waitFor(() => { expect(result.current.enabled).toBe(false); });
       unmount();
     });
   });
 
   describe('useAllEnabled and useAllDisabled', () => {
-    it('should return true when all features in list are enabled', () => {
-      const { result } = renderHook(() => useAllEnabled(['Feature2']), {
-        wrapper: Features,
-        initialProps: { features: baseFeatures },
-      });
+    it('should return true when all features in list are enabled', async () => {
+      const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+        <Features features={baseFeatures}>{children}</Features>
+      );
 
-      expect(result.current).toBe(true); // Feature2 is enabled
+      const { result } = renderHook(
+        () => {
+          const res = useAllEnabled(['Feature2']);
+          const context = React.useContext(FeatureContext);
+          return { res, defaultsState: context?.defaultsState };
+        },
+        { wrapper: Wrapper },
+      );
+
+      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
+      expect(result.current.res).toBe(true); // Feature2 is enabled
     });
 
-    it('should update when features are enabled', () => {
+    it('should update when features are enabled', async () => {
+      const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+        <Features features={baseFeatures}>{children}</Features>
+      );
+
       const { result, unmount } = renderHook(
         () => {
           const allEnabled = useAllEnabled(['Feature1', 'Feature2']);
           const context = React.useContext(FeatureContext);
-          return { allEnabled, dispatch: context?.overridesSend };
+          return { allEnabled, dispatch: context?.overridesSend, defaultsState: context?.defaultsState };
         },
-        { wrapper: Features, initialProps: { features: baseFeatures } },
+        { wrapper: Wrapper },
       );
 
+      await waitFor(() => { expect(result.current.defaultsState?.value).toBe('ready'); });
       expect(result.current.allEnabled).toBe(false);
 
       act(() => {
