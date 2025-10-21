@@ -1,4 +1,10 @@
-import { RadioGroup } from '@headlessui/react';
+import {
+  Radio,
+  RadioGroup,
+  RadioGroupDescription,
+  RadioGroupLabel,
+} from '@headlessui/react';
+import type * as React from 'react';
 import { type ReactNode, useCallback, useContext, useState } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -16,7 +22,7 @@ function ToggleFeature({
   feature,
 }: {
   feature: FeatureDescription;
-}): JSX.Element | null {
+}): React.JSX.Element | null {
   const context = useContext(FeatureContext);
   const handleChangeSelection = useCallback(
     (value: 'false' | 'true' | 'unset') => {
@@ -62,7 +68,7 @@ function ToggleFeature({
       onChange={handleChangeSelection}
       value={valueInOverrides}
     >
-      <RadioGroup.Label>
+      <RadioGroupLabel>
         <h6 className="text-gray-900 align-center flex flex-row flex-nowrap items-center gap-2 lg:gap-4 h-7">
           <span className="font-medium">
             Feature: <code>{feature.name}</code>
@@ -109,7 +115,7 @@ function ToggleFeature({
             {feature.description}
           </p>
         )}
-      </RadioGroup.Label>
+      </RadioGroupLabel>
       <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
         {[
           {
@@ -139,13 +145,10 @@ function ToggleFeature({
             description: 'Override the feature to be enabled',
           },
         ].map((option) => (
-          <RadioGroup.Option
-            className={({ checked, active, disabled }) =>
+          <Radio
+            className={({ checked, disabled }) =>
               classNames(
                 checked ? 'border-transparent' : 'border-gray-300',
-                !disabled && active
-                  ? 'border-blue-500 ring-2 ring-blue-500'
-                  : '',
                 disabled
                   ? 'border-transparent ring-gray-500 cursor-not-allowed'
                   : 'cursor-pointer',
@@ -156,10 +159,10 @@ function ToggleFeature({
             key={option.id}
             value={option.id}
           >
-            {({ checked, active, disabled }) => (
+            {({ checked, disabled }) => (
               <>
                 <div className="flex flex-col grow">
-                  <RadioGroup.Label
+                  <RadioGroupLabel
                     as="span"
                     className="flex flex-nowrap flex-row gap-1 items-center space-between"
                   >
@@ -183,18 +186,18 @@ function ToggleFeature({
                         fillRule="evenodd"
                       />
                     </svg>
-                  </RadioGroup.Label>
-                  <RadioGroup.Description
+                  </RadioGroupLabel>
+                  <RadioGroupDescription
                     as="span"
                     className="mt-1 flex items-center text-sm text-gray-500"
                   >
                     {option.description}
-                  </RadioGroup.Description>
+                  </RadioGroupDescription>
                 </div>
                 <div
                   aria-hidden="true"
                   className={classNames(
-                    !disabled && active ? 'border' : 'border-2',
+                    'border-2',
                     checked
                       ? disabled
                         ? 'border-gray-500'
@@ -205,7 +208,7 @@ function ToggleFeature({
                 />
               </>
             )}
-          </RadioGroup.Option>
+          </Radio>
         ))}
       </div>
     </RadioGroup>
@@ -233,7 +236,7 @@ export function ToggleFeatures({
 }: {
   defaultOpen?: boolean;
   hidden?: boolean;
-}): JSX.Element | null {
+}): React.JSX.Element | null {
   const [root, setCoreRoot] = useState<HTMLDivElement | null>(null);
 
   const setRoot = (host: HTMLDivElement | null) => {
@@ -281,7 +284,7 @@ export function ToggleFeatureUnwrapped({
 }: {
   defaultOpen?: boolean;
   hidden?: boolean;
-}): JSX.Element | null {
+}): React.JSX.Element | null {
   const [open, setOpen] = useState(defaultOpen);
   const context = useContext(FeatureContext);
 

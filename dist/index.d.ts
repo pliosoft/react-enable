@@ -9,7 +9,7 @@ interface EnableProps {
 /**
  * Feature will be enabled if any feature in the list are enabled,
  */
-declare function Enable({ feature, allFeatures, children, }: EnableProps): JSX.Element | null;
+declare function Enable({ feature, allFeatures, children, }: EnableProps): React.JSX.Element | null;
 
 /**
  * Feature will be disabled if any in the list are enabled
@@ -132,12 +132,12 @@ interface FeatureProps {
  * Keeps track of overrides and defaults, with defaults potentially coming from your props
  * and overrides being persisted to your choice of storage layer.
  */
-declare function Features({ children, features, disableConsole, storage, rolloutStableId, }: FeatureProps): JSX.Element;
+declare function Features({ children, features, disableConsole, storage, rolloutStableId, }: FeatureProps): React.JSX.Element;
 
 declare function ToggleFeatures({ defaultOpen, hidden, }: {
     defaultOpen?: boolean;
     hidden?: boolean;
-}): JSX.Element | null;
+}): React.JSX.Element | null;
 
 /**
  * returns true iff all specified features are disabled
