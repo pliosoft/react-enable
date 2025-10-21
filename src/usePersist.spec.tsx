@@ -134,7 +134,7 @@ describe('usePersist', () => {
 
   it('should handle storage setItem errors gracefully', () => {
     const storage = new LocalStorageMock();
-    storage.setItem = jest.fn(() => {
+    storage.setItem = vi.fn(() => {
       throw new Error('Storage quota exceeded');
     });
 

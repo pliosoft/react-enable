@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import * as React from 'react';
 
 import { FeatureContext } from './FeatureContext';
@@ -312,7 +312,7 @@ describe('Integration Tests - Public API', () => {
 
   describe('async onChangeDefault', () => {
     it('should handle async feature changes', async () => {
-      const onChangeMock = jest.fn().mockResolvedValue(true);
+      const onChangeMock = vi.fn().mockResolvedValue(true);
       const asyncFeatures: FeatureDescription[] = [
         {
           name: 'AsyncFeature',
@@ -322,7 +322,7 @@ describe('Integration Tests - Public API', () => {
         },
       ];
 
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => {
           const enabled = useEnabled('AsyncFeature');
           const context = React.useContext(FeatureContext);
@@ -337,14 +337,14 @@ describe('Integration Tests - Public API', () => {
         result.current.dispatch?.({ type: 'ENABLE', name: 'AsyncFeature' });
       });
 
-      await waitForNextUpdate();
-
-      expect(onChangeMock).toHaveBeenCalledWith('AsyncFeature', true);
-      expect(result.current.enabled).toBe(true);
+      await waitFor(() => {
+        expect(onChangeMock).toHaveBeenCalledWith('AsyncFeature', true);
+        expect(result.current.enabled).toBe(true);
+      });
     });
 
     it('should handle async feature changes that reject', async () => {
-      const onChangeMock = jest
+      const onChangeMock = vi
         .fn()
         .mockRejectedValue(new Error('Backend error'));
       const asyncFeatures: FeatureDescription[] = [
@@ -356,7 +356,7 @@ describe('Integration Tests - Public API', () => {
         },
       ];
 
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => {
           const enabled = useEnabled('AsyncFeature');
           const context = React.useContext(FeatureContext);
@@ -371,15 +371,15 @@ describe('Integration Tests - Public API', () => {
         result.current.dispatch?.({ type: 'ENABLE', name: 'AsyncFeature' });
       });
 
-      await waitForNextUpdate();
-
-      expect(onChangeMock).toHaveBeenCalledWith('AsyncFeature', true);
-      // Should revert to undefined/unset on error
-      expect(result.current.enabled).toBe(false);
+      await waitFor(() => {
+        expect(onChangeMock).toHaveBeenCalledWith('AsyncFeature', true);
+        // Should revert to undefined/unset on error
+        expect(result.current.enabled).toBe(false);
+      });
     });
 
     it('should handle async feature that returns different value', async () => {
-      const onChangeMock = jest.fn().mockResolvedValue(false);
+      const onChangeMock = vi.fn().mockResolvedValue(false);
       const asyncFeatures: FeatureDescription[] = [
         {
           name: 'AsyncFeature',
@@ -389,7 +389,7 @@ describe('Integration Tests - Public API', () => {
         },
       ];
 
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => {
           const enabled = useEnabled('AsyncFeature');
           const context = React.useContext(FeatureContext);
@@ -404,11 +404,11 @@ describe('Integration Tests - Public API', () => {
         result.current.dispatch?.({ type: 'ENABLE', name: 'AsyncFeature' });
       });
 
-      await waitForNextUpdate();
-
-      expect(onChangeMock).toHaveBeenCalledWith('AsyncFeature', true);
-      // Backend returned false instead of true
-      expect(result.current.enabled).toBe(false);
+      await waitFor(() => {
+        expect(onChangeMock).toHaveBeenCalledWith('AsyncFeature', true);
+        // Backend returned false instead of true
+        expect(result.current.enabled).toBe(false);
+      });
     });
   });
 

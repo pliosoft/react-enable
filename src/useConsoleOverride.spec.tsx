@@ -14,13 +14,13 @@ describe('useConsoleOverride', () => {
     return name === 'Feature2';
   };
 
-  const mockDispatch: FeaturesDispatch = jest.fn();
+  const mockDispatch: FeaturesDispatch = vi.fn();
 
   beforeEach(() => {
     if (window.feature !== undefined) {
       window.feature = undefined;
     }
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -87,7 +87,7 @@ describe('useConsoleOverride', () => {
       ...testFeatures,
       { name: 'Feature3', description: 'New', defaultValue: false },
     ];
-    const newDispatch: FeaturesDispatch = jest.fn();
+    const newDispatch: FeaturesDispatch = vi.fn();
 
     rerender({ features: newFeatures, dispatch: newDispatch });
 
@@ -124,16 +124,16 @@ describe('GlobalEnable', () => {
     { name: 'Feature2', description: 'Test Feature 2', defaultValue: true },
   ];
 
-  const mockTestFeature = jest.fn((name: string): FeatureValue => {
+  const mockTestFeature = vi.fn((name: string): FeatureValue => {
     return name === 'Feature2';
   });
 
-  const mockDispatch = jest.fn();
+  const mockDispatch = vi.fn();
 
   let globalEnable: GlobalEnable;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockTestFeature.mockImplementation((name: string): FeatureValue => {
       return name === 'Feature2';
     });

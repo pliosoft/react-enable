@@ -1,10 +1,4 @@
-import {
-  type ReactNode,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-} from 'react';
+import { type ReactNode, useEffect, useLayoutEffect, useMemo, useReducer, useRef } from 'react';
 
 import { EnableContext } from './EnableContext';
 import { FeatureContext } from './FeatureContext';
@@ -44,7 +38,7 @@ export function Features({
     initialFeaturesState,
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     /// Load defaults
     defaultsDispatch({ type: 'INIT', features });
     return () => {
@@ -52,7 +46,7 @@ export function Features({
     };
   }, [features]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let f: Record<string, boolean | undefined> = {};
     if (storage != null) {
       try {
