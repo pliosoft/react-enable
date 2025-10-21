@@ -64,7 +64,7 @@ export function featuresReducer(
 ): FeaturesState {
   switch (action.type) {
     case 'INIT': {
-      if (action.features.length === 0) {
+      if (!action.features || action.features.length === 0) {
         return state;
       }
 

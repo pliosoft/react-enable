@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FeatureDescription, FeatureValue } from './FeatureState';
 import type { FeaturesDispatch } from './FeaturesState';
 import { GlobalEnable } from './GlobalEnable';

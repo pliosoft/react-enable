@@ -69,7 +69,7 @@ export function Features({
 
     overridesDispatch({
       type: 'INIT',
-      features: featuresRef.current
+      features: (featuresRef.current ?? [])
         .filter((x) => x.noOverride !== true)
         .map((x) => ({
           name: x.name,

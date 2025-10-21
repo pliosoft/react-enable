@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 // biome-ignore lint/style/useImportType: JSX requires React at runtime
 import * as React from 'react';
 
