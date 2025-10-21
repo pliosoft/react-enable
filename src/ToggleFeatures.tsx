@@ -1,5 +1,5 @@
 import { RadioGroup } from '@headlessui/react';
-import React, {
+import {
   type ReactNode,
   useCallback,
   useContext,
