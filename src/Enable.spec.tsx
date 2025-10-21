@@ -1,5 +1,4 @@
 import { render } from '@testing-library/react';
-import * as React from 'react';
 
 import { Disable } from './Disable';
 import { Enable } from './Enable';

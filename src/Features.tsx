@@ -1,3 +1,4 @@
+import type * as React from 'react';
 import {
   type ReactNode,
   useEffect,
@@ -41,7 +42,7 @@ export function Features({
   disableConsole = false,
   storage = window.sessionStorage,
   rolloutStableId,
-}: FeatureProps): JSX.Element {
+}: FeatureProps): React.JSX.Element {
   // Capture only first value; we don't care about future updates
   const featuresRef = useRef(features);
 
@@ -58,7 +59,7 @@ export function Features({
         if (existingId != null) {
           return existingId;
         }
-      } catch (e) {
+      } catch (_e) {
         // Can't read from storage; generate new ID
       }
     }
@@ -70,7 +71,7 @@ export function Features({
     if (storage != null) {
       try {
         storage.setItem(ROLLOUT_ID_KEY, newId);
-      } catch (e) {
+      } catch (_e) {
         // Can't persist; ID will still work for this session
       }
     }

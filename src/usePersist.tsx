@@ -32,7 +32,7 @@ export default function usePersist(
       if (storage != null && overrideState.value === 'ready') {
         storage.setItem(KEY, strState);
       }
-    } catch (e) {
+    } catch (_e) {
       // Can't set for some reason
     }
   }, [overrideState, storage, strState]);

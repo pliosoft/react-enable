@@ -17,7 +17,7 @@ export function Enable({
   feature = [],
   allFeatures = [],
   children,
-}: EnableProps): JSX.Element | null {
+}: EnableProps): React.JSX.Element | null {
   const isAny = useEnabled(feature);
   const isAll = useAllEnabled(allFeatures);
 
