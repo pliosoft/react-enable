@@ -5,10 +5,13 @@ Easy and fast way to toggle features in your project.
 Features include:
 
 - Toggle parts of your project dynamically or at startup
+- Percentage-based rollouts for gradual feature adoption and A/B testing
 - Built in state management for active features
 - Roll your own state manager using the minimal functional interface
 
 ## Installation and usage
+
+**Requirements:** Node.js 18.0.0 or higher
 
 To install,
 
@@ -51,6 +54,47 @@ function App(): JSX.Element {
 }
 ```
 
+## Percentage-based Rollouts and A/B Testing
+
+React-Enable supports gradual rollouts and A/B testing through percentage-based feature flags. This allows you to enable features for a specific percentage of users.
+
+```typescript
+import { Features, Enable } from 'react-enable';
+
+// Enable the feature for 30% of users
+const FEATURES: FeatureDescription[] = [
+  { name: 'newDesign', enableFor: 0.3 }  // 30% rollout
+];
+
+function App(): JSX.Element {
+  const userId = getUserId(); // Get a stable user identifier
+
+  return (
+    <Features features={FEATURES} rolloutStableId={userId}>
+      <Enable feature="newDesign">
+        <NewDesign />
+      </Enable>
+      <Disable feature="newDesign">
+        <OldDesign />
+      </Disable>
+    </Features>
+  );
+}
+```
+
+### Key Features
+
+- **Deterministic Assignment**: The same user (based on `rolloutStableId`) will always see the same features, ensuring consistent user experience
+- **Auto-generated IDs**: If `rolloutStableId` is not provided, an ID is automatically generated and persisted to sessionStorage
+- **Gradual Rollouts**: Easily increase feature adoption by adjusting the `enableFor` value (0.0 to 1.0)
+- **A/B Testing**: Use different percentage values to test multiple feature variants
+
+### Best Practices
+
+- Use a stable user identifier (user ID, session ID, etc.) for `rolloutStableId` to ensure consistency across page loads
+- Start with small percentages (e.g., 0.05 for 5%) and gradually increase as you validate the feature
+- Combine with manual overrides using `ToggleFeatures` component for testing
+
 ## Documentation
 
 ### `Features` component
@@ -60,10 +104,23 @@ Provides state and context for managing a set of features.
 Available props:
 
 - `features: FeatureDescription[]`: description of available features.
+- `rolloutStableId?: string`: stable identifier for percentage-based rollouts
+  (e.g., user ID, session ID). If not provided, an ID is auto-generated
+  and persisted to sessionStorage
 - `disableConsole?: boolean`: indicate the console API
   should not be enabled (default false)
 - `storage?: Storage`: where to persist
   overrides (default `window.sessionStorage`)
+
+### `FeatureDescription` type
+
+Defines a feature flag with the following properties:
+
+- `name: string`: unique identifier for the feature
+- `defaultValue?: boolean`: whether the feature is enabled by default (default false)
+- `enableFor?: number`: percentage of users to enable this feature for (0.0 to 1.0).
+  When specified, this takes precedence over `defaultValue` and uses deterministic
+  hashing based on `rolloutStableId` to ensure consistent assignment
 
 ### `Enabled` and `Disabled` components
 
