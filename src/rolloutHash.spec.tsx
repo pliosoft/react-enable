@@ -62,7 +62,12 @@ describe('rolloutHash', () => {
       ];
 
       // Test with multiple feature names to get more data points
-      for (const featureName of ['feature-a', 'feature-b', 'feature-c', 'feature-d']) {
+      for (const featureName of [
+        'feature-a',
+        'feature-b',
+        'feature-c',
+        'feature-d',
+      ]) {
         for (const userId of testStrings) {
           hashes.push(hashToPercentage(`${featureName}:${userId}`));
         }

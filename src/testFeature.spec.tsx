@@ -336,7 +336,11 @@ describe('testFeature', () => {
           },
         ],
       });
-      overrideState = setFeatureValue(overrideState, 'RolloutFeature', undefined);
+      overrideState = setFeatureValue(
+        overrideState,
+        'RolloutFeature',
+        undefined,
+      );
 
       // Default state with rollout
       const defaultState = featuresReducer(initialFeaturesState, {
@@ -351,7 +355,11 @@ describe('testFeature', () => {
       });
 
       // Should fall back to rollout from default state
-      const result = testFeature('RolloutFeature', [overrideState, defaultState], 'user-1');
+      const result = testFeature(
+        'RolloutFeature',
+        [overrideState, defaultState],
+        'user-1',
+      );
       expect(result).toBeDefined();
     });
   });

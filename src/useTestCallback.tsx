@@ -10,7 +10,8 @@ export default function useTestCallback(
   rolloutStableId?: string,
 ): (feature: string) => boolean | undefined {
   return useCallback(
-    (f: string) => testFeature(f, [overridesState, defaultsState], rolloutStableId),
+    (f: string) =>
+      testFeature(f, [overridesState, defaultsState], rolloutStableId),
     [overridesState, defaultsState, rolloutStableId],
   );
 }
