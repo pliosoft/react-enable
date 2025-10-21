@@ -72,6 +72,12 @@ function Enable({
 // src/Features.tsx
 
 
+
+
+
+
+
+
 // src/FeatureContext.tsx
 
 var FeatureContext = _react.createContext.call(void 0, null);
@@ -374,8 +380,26 @@ function usePersist(storage, features, overrideState) {
 // src/useTestCallback.tsx
 
 
+// src/rolloutHash.tsx
+function hashToPercentage(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) + hash + char | 0;
+  }
+  const unsigned = hash >>> 0;
+  return unsigned / 4294967296;
+}
+function isInRollout(featureName, rolloutStableId, percentage) {
+  if (percentage <= 0) return false;
+  if (percentage >= 1) return true;
+  const combinedKey = `${featureName}:${rolloutStableId}`;
+  const hash = hashToPercentage(combinedKey);
+  return hash < percentage;
+}
+
 // src/testFeature.tsx
-function testFeature(feature, states) {
+function testFeature(feature, states, rolloutStableId) {
   const values = states.map((state) => valueOfFeature(state, feature));
   for (const [featureValue, featureForced] of values) {
     if (featureValue != null && featureForced) {
@@ -387,26 +411,61 @@ function testFeature(feature, states) {
       return featureValue;
     }
   }
+  if (rolloutStableId != null) {
+    for (const state of states) {
+      if (state.value === "ready" && state.context.features[feature] != null) {
+        const featureState = state.context.features[feature];
+        const enableFor = _optionalChain([featureState, 'access', _15 => _15.featureDesc, 'optionalAccess', _16 => _16.enableFor]);
+        if (enableFor != null) {
+          return isInRollout(feature, rolloutStableId, enableFor);
+        }
+      }
+    }
+  }
   return void 0;
 }
 
 // src/useTestCallback.tsx
-function useTestCallback(defaultsState, overridesState) {
+function useTestCallback(overridesState, defaultsState, rolloutStableId) {
   return _react.useCallback.call(void 0, 
-    (f) => testFeature(f, [defaultsState, overridesState]),
-    [defaultsState, overridesState]
+    (f) => testFeature(f, [overridesState, defaultsState], rolloutStableId),
+    [overridesState, defaultsState, rolloutStableId]
   );
 }
 
 // src/Features.tsx
 
+var ROLLOUT_ID_KEY = "react-enable:rollout-stable-id";
 function Features({
   children,
   features,
   disableConsole = false,
-  storage = window.sessionStorage
+  storage = window.sessionStorage,
+  rolloutStableId
 }) {
   const featuresRef = _react.useRef.call(void 0, features);
+  const stableId = _react.useMemo.call(void 0, () => {
+    if (rolloutStableId != null) {
+      return rolloutStableId;
+    }
+    if (storage != null) {
+      try {
+        const existingId = storage.getItem(ROLLOUT_ID_KEY);
+        if (existingId != null) {
+          return existingId;
+        }
+      } catch (e) {
+      }
+    }
+    const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    if (storage != null) {
+      try {
+        storage.setItem(ROLLOUT_ID_KEY, newId);
+      } catch (e) {
+      }
+    }
+    return newId;
+  }, [rolloutStableId, storage]);
   const [overridesState, overridesDispatch] = _react.useReducer.call(void 0, 
     featuresReducer,
     initialFeaturesState
@@ -415,13 +474,13 @@ function Features({
     featuresReducer,
     initialFeaturesState
   );
-  _react.useEffect.call(void 0, () => {
+  _react.useLayoutEffect.call(void 0, () => {
     defaultsDispatch({ type: "INIT", features });
     return () => {
       defaultsDispatch({ type: "DE_INIT" });
     };
   }, [features]);
-  _react.useEffect.call(void 0, () => {
+  _react.useLayoutEffect.call(void 0, () => {
     let f = {};
     if (storage != null) {
       try {
@@ -439,7 +498,7 @@ function Features({
       features: (_nullishCoalesce(featuresRef.current, () => ( []))).filter((x) => x.noOverride !== true).map((x) => ({
         name: x.name,
         description: x.description,
-        defaultValue: _nullishCoalesce(_optionalChain([f, 'optionalAccess', _15 => _15[x.name]]), () => ( void 0))
+        defaultValue: _nullishCoalesce(_optionalChain([f, 'optionalAccess', _17 => _17[x.name]]), () => ( void 0))
       }))
     });
     return () => {
@@ -454,7 +513,7 @@ function Features({
       ([name, feature]) => {
         if (feature.value === "asyncEnabled" || feature.value === "asyncDisabled" || feature.value === "asyncUnspecified") {
           const targetValue = feature.value === "asyncEnabled" ? true : feature.value === "asyncDisabled" ? false : void 0;
-          const onChangeDefault = _optionalChain([feature, 'access', _16 => _16.featureDesc, 'optionalAccess', _17 => _17.onChangeDefault]);
+          const onChangeDefault = _optionalChain([feature, 'access', _18 => _18.featureDesc, 'optionalAccess', _19 => _19.onChangeDefault]);
           if (onChangeDefault != null && feature.featureDesc != null) {
             onChangeDefault(feature.featureDesc.name, targetValue).then((result) => {
               defaultsDispatch({ type: "ASYNC_DONE", name, value: result });
@@ -471,7 +530,7 @@ function Features({
     );
   }, [defaultsState]);
   usePersist(storage, featuresRef.current, overridesState);
-  const testCallback = useTestCallback(overridesState, defaultsState);
+  const testCallback = useTestCallback(overridesState, defaultsState, stableId);
   useConsoleOverride(
     !disableConsole,
     featuresRef.current,
@@ -511,7 +570,7 @@ function ToggleFeature({
   const context = _react.useContext.call(void 0, FeatureContext);
   const handleChangeSelection = _react.useCallback.call(void 0, 
     (value) => {
-      if (_optionalChain([context, 'optionalAccess', _18 => _18.overridesSend]) != null) {
+      if (_optionalChain([context, 'optionalAccess', _20 => _20.overridesSend]) != null) {
         switch (value) {
           case "true": {
             context.overridesSend({ type: "ENABLE", name: feature.name });
@@ -701,7 +760,7 @@ function ToggleFeatures({
     if (host == null || root != null) {
       return;
     }
-    const shadowRoot = _optionalChain([host, 'optionalAccess', _19 => _19.attachShadow, 'call', _20 => _20({ mode: "open" })]);
+    const shadowRoot = _optionalChain([host, 'optionalAccess', _21 => _21.attachShadow, 'call', _22 => _22({ mode: "open" })]);
     const style = document.createElement("style");
     const renderDiv = document.createElement("div");
     style.textContent = tailwind_default;

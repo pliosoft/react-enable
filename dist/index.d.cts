@@ -38,6 +38,7 @@ interface FeatureDescription<K extends string = string> {
     readonly force?: boolean;
     readonly noOverride?: boolean;
     readonly defaultValue?: FeatureValue;
+    readonly enableFor?: number;
 }
 /**
  * Actions that can be performed on a feature.
@@ -123,6 +124,7 @@ interface FeatureProps {
     readonly children?: ReactNode;
     readonly disableConsole?: boolean;
     readonly storage?: Storage;
+    readonly rolloutStableId?: string;
 }
 /**
  * A more batteries-enabled parent component that keeps track of feature state
@@ -130,7 +132,7 @@ interface FeatureProps {
  * Keeps track of overrides and defaults, with defaults potentially coming from your props
  * and overrides being persisted to your choice of storage layer.
  */
-declare function Features({ children, features, disableConsole, storage, }: FeatureProps): JSX.Element;
+declare function Features({ children, features, disableConsole, storage, rolloutStableId, }: FeatureProps): JSX.Element;
 
 declare function ToggleFeatures({ defaultOpen, hidden, }: {
     defaultOpen?: boolean;

@@ -70,7 +70,13 @@ function Enable({
 }
 
 // src/Features.tsx
-import { useEffect as useEffect3, useMemo as useMemo3, useReducer, useRef } from "react";
+import {
+  useEffect as useEffect3,
+  useLayoutEffect,
+  useMemo as useMemo3,
+  useReducer,
+  useRef
+} from "react";
 
 // src/FeatureContext.tsx
 import { createContext as createContext2 } from "react";
@@ -374,8 +380,26 @@ function usePersist(storage, features, overrideState) {
 // src/useTestCallback.tsx
 import { useCallback } from "react";
 
+// src/rolloutHash.tsx
+function hashToPercentage(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) + hash + char | 0;
+  }
+  const unsigned = hash >>> 0;
+  return unsigned / 4294967296;
+}
+function isInRollout(featureName, rolloutStableId, percentage) {
+  if (percentage <= 0) return false;
+  if (percentage >= 1) return true;
+  const combinedKey = `${featureName}:${rolloutStableId}`;
+  const hash = hashToPercentage(combinedKey);
+  return hash < percentage;
+}
+
 // src/testFeature.tsx
-function testFeature(feature, states) {
+function testFeature(feature, states, rolloutStableId) {
   const values = states.map((state) => valueOfFeature(state, feature));
   for (const [featureValue, featureForced] of values) {
     if (featureValue != null && featureForced) {
@@ -387,26 +411,61 @@ function testFeature(feature, states) {
       return featureValue;
     }
   }
+  if (rolloutStableId != null) {
+    for (const state of states) {
+      if (state.value === "ready" && state.context.features[feature] != null) {
+        const featureState = state.context.features[feature];
+        const enableFor = featureState.featureDesc?.enableFor;
+        if (enableFor != null) {
+          return isInRollout(feature, rolloutStableId, enableFor);
+        }
+      }
+    }
+  }
   return void 0;
 }
 
 // src/useTestCallback.tsx
-function useTestCallback(defaultsState, overridesState) {
+function useTestCallback(overridesState, defaultsState, rolloutStableId) {
   return useCallback(
-    (f) => testFeature(f, [defaultsState, overridesState]),
-    [defaultsState, overridesState]
+    (f) => testFeature(f, [overridesState, defaultsState], rolloutStableId),
+    [overridesState, defaultsState, rolloutStableId]
   );
 }
 
 // src/Features.tsx
 import { jsx as jsx3 } from "react/jsx-runtime";
+var ROLLOUT_ID_KEY = "react-enable:rollout-stable-id";
 function Features({
   children,
   features,
   disableConsole = false,
-  storage = window.sessionStorage
+  storage = window.sessionStorage,
+  rolloutStableId
 }) {
   const featuresRef = useRef(features);
+  const stableId = useMemo3(() => {
+    if (rolloutStableId != null) {
+      return rolloutStableId;
+    }
+    if (storage != null) {
+      try {
+        const existingId = storage.getItem(ROLLOUT_ID_KEY);
+        if (existingId != null) {
+          return existingId;
+        }
+      } catch (e) {
+      }
+    }
+    const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    if (storage != null) {
+      try {
+        storage.setItem(ROLLOUT_ID_KEY, newId);
+      } catch (e) {
+      }
+    }
+    return newId;
+  }, [rolloutStableId, storage]);
   const [overridesState, overridesDispatch] = useReducer(
     featuresReducer,
     initialFeaturesState
@@ -415,13 +474,13 @@ function Features({
     featuresReducer,
     initialFeaturesState
   );
-  useEffect3(() => {
+  useLayoutEffect(() => {
     defaultsDispatch({ type: "INIT", features });
     return () => {
       defaultsDispatch({ type: "DE_INIT" });
     };
   }, [features]);
-  useEffect3(() => {
+  useLayoutEffect(() => {
     let f = {};
     if (storage != null) {
       try {
@@ -471,7 +530,7 @@ function Features({
     );
   }, [defaultsState]);
   usePersist(storage, featuresRef.current, overridesState);
-  const testCallback = useTestCallback(overridesState, defaultsState);
+  const testCallback = useTestCallback(overridesState, defaultsState, stableId);
   useConsoleOverride(
     !disableConsole,
     featuresRef.current,
